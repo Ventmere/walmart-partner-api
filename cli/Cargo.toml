@@ -1,0 +1,10 @@
+[package]
+name = "cli"
+version = "0.1.0"
+authors = ["Flux Xu <fluxxu@gmail.com>"]
+
+[dependencies]
+clap = "2.26.0"
+dotenv = "0.10.1"
+chrono = { version = "0.4", features = ["serde"] }
+walmart_partner_api = { path = "../walmart-partner-api" }
