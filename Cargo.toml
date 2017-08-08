@@ -6,6 +6,10 @@ authors = ["Flux Xu <fluxxu@gmail.com>"]
 [dependencies]
 reqwest = "0.7.2"
 error-chain = "0.10.0"
-ring = { version = "0.11.0", features = ["rsa_signing"] }
 base64 = "0.6.0"
 chrono = "0.4"
+untrusted = "0.5.0"
+openssl = "0.9.15"
+
+[dev-dependencies]
+dotenv = "0.10.1"
