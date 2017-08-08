@@ -2,7 +2,7 @@
 //!
 //! [Walmart Documentation](https://developer.walmart.com/#/apicenter/contentProvider#authentication)
 
-pub use reqwest::Method;
+use reqwest::Method;
 use openssl::rsa::Rsa;
 use openssl::sign::Signer;
 use openssl::pkey::PKey;
@@ -36,13 +36,16 @@ impl Signature {
       method = method,
       timestamp = timestamp
     );
-    println!("sign: {}", input);
     
     let mut signer = Signer::new(MessageDigest::sha256(), &self.keypair)?;
     signer.update(input.as_bytes())?;
     let signature = signer.finish()?;
 
     Ok(encode(&signature))
+  }
+
+  pub fn consumer_id(&self) -> &str {
+    self.consumer_id.as_ref()
   }
 }
 
