@@ -22,6 +22,12 @@ impl<'a> ExtendUrlParams for &'a str {
   }
 }
 
+impl<'a> ExtendUrlParams for String {
+  fn extend_url_params(self, url: &mut Url) {
+    url.set_query(Some(self.as_ref()));
+  }
+}
+
 impl<T1: AsRef<str>, T2: AsRef<str>> ExtendUrlParams for Vec<(T1, T2)> {
   fn extend_url_params(self, url: &mut Url) {
     url.query_pairs_mut().extend_pairs(self);
@@ -110,15 +116,12 @@ mod tests {
   use std::env;
 
   // #[test]
-  // fn name() {
+  // fn client() {
   //   use std::io::Read;
   //   dotenv().ok();
 
   //   let client = Client::new(&env::var("WALMART_CONSUMER_ID").unwrap(), &env::var("WALMART_PRIVATE_KEY").unwrap()).unwrap();
-  //   let mut res = client.request_json(Method::Get, "v3/orders", vec![
-  //     ("createdStartDate", "2016-08-16T10:30:30.155Z"),
-  //     ("status", "Acknowledged"),
-  //   ]).unwrap().send().unwrap();
+  //   let mut res = client.request_json(Method::Get, "/v3/orders/fakeid", ()).unwrap().send().unwrap();
   //   println!("status: {}", res.status());
   //   let mut json = String::new();
   //   res.read_to_string(&mut json).unwrap();
@@ -126,7 +129,7 @@ mod tests {
   //   {
   //     use std::fs::File;
   //     use std::io::Write;
-  //     let mut f = File::create("orders.json").unwrap();
+  //     let mut f = File::create("samples/order_not_found.json").unwrap();
   //     write!(&mut f, "{}", json).unwrap()
   //   }
   // }

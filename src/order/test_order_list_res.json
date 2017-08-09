@@ -1,140 +1,12 @@
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct CurrencyAmount {
-  pub currency: String,
-  pub amount: f64,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct PostalAddress {
-  pub name: String,
-  pub address1: String,
-  pub address2: Option<String>,
-  pub city: String,
-  pub state: String,
-  pub postalCode: String,
-  pub country: String,
-  pub addressType: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct ShippingInformation {
-  pub phone: String,
-  pub estimatedDeliveryDate: i64,
-  pub estimatedShipDate: i64,
-  pub methodCode: String,
-  pub postalAddress: PostalAddress,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineItem {
-  pub productName: String,
-  pub sku: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct Tax {
-  pub taxName: String,
-  pub taxAmount: CurrencyAmount,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineChargeItem {
-  pub chargeType: String,
-  pub chargeName: String,
-  pub chargeAmount: CurrencyAmount,
-  pub tax: Option<Tax>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct Quantity {
-  pub unitOfMeasurement: String,
-  pub amount: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineCharges {
-  pub charge: Vec<OrderLineChargeItem>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineTrackingInfoCarrier {
-  pub otherCarrier: Option<String>,
-  pub carrier: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineTrackingInfo {
-  pub shipDateTime: i64,
-  pub carrierName: OrderLineTrackingInfoCarrier,
-  pub methodCode: String,
-  pub trackingNumber: String,
-  pub trackingURL: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineStatus {
-  pub status: String, 
-  pub statusQuantity: Quantity,
-  // pub cancellationReason: Option<?>,
-  pub trackingInfo: Option<OrderLineTrackingInfo>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLineStatuss {
-  pub orderLineStatus: Vec<OrderLineStatus>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLine {
-  pub lineNumber: String,
-  pub item: OrderLineItem,
-  pub charges: OrderLineCharges,
-  pub orderLineQuantity: Quantity,
-  pub statusDate: i64,
-  pub orderLineStatuses: OrderLineStatuss,
-  // pub refund: Option<?>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct OrderLines {
-  pub orderLine: Vec<OrderLine>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct Order {
-  pub purchaseOrderId: String,
-  pub customerOrderId: String,
-  pub customerEmailId: String,
-  pub orderDate: i64,
-  pub shippingInfo: ShippingInformation,
-  pub orderLines: OrderLines,
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn deserialize() {
-    use serde_json;
-
-    let json = r##"
-      [
+{
+  "list": {
+    "meta": {
+      "totalCount": 66,
+      "limit": 10,
+      "nextCursor": "?limit=10&hasMoreElements=true&soIndex=66&poIndex=10&partnerId=10000000754&sellerId=747&status=Shipped&createdStartDate=2016-08-16T10:30:30.155Z&createdEndDate=2017-08-08T18:52:57.162Z"
+    },
+    "elements": {
+      "order": [
         {
           "purchaseOrderId": "11",
           "customerOrderId": "12",
@@ -275,10 +147,6 @@ mod tests {
           }
         }
       ]
-    "##;
-
-    let orders: Vec<Order> = serde_json::from_str(&json).unwrap();
-    assert_eq!(orders[0].orderLines.orderLine[0].lineNumber, "1");
-    assert_eq!(orders[0].orderLines.orderLine[0].item.sku, "edifier-h850");
+    }
   }
 }

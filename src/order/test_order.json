@@ -1,0 +1,101 @@
+{
+  "order": {
+    "purchaseOrderId": "1577684050862",
+    "customerOrderId": "2861700797280",
+    "customerEmailId": "jsanthanam@walmartlabs.com",
+    "orderDate": 1484458949000,
+    "shippingInfo": {
+      "phone": "4151234567",
+      "estimatedDeliveryDate": 1485586800000,
+      "estimatedShipDate": 1484636400000,
+      "methodCode": "Value",
+      "postalAddress": {
+        "name": "Asha  Chakre",
+        "address1": "860 W California ave",
+        "address2": null,
+        "city": "Sunnyvale",
+        "state": "CA",
+        "postalCode": "94086",
+        "country": "USA",
+        "addressType": "RESIDENTIAL"
+      }
+    },
+    "orderLines": {
+      "orderLine": [
+        {
+          "lineNumber": "1",
+          "item": {
+            "productName": "Kellogg's Rice Krispies Cereal, 24 oz",
+            "sku": "MGR_07_21_00100123"
+          },
+          "charges": {
+            "charge": [
+              {
+                "chargeType": "PRODUCT",
+                "chargeName": "ItemPrice",
+                "chargeAmount": {
+                  "currency": "USD",
+                  "amount": 19.99
+                },
+                "tax": {
+                  "taxName": "Tax1",
+                  "taxAmount": {
+                    "currency": "USD",
+                    "amount": 1.7
+                  }
+                }
+              }
+            ]
+          },
+          "orderLineQuantity": {
+            "unitOfMeasurement": "EACH",
+            "amount": "1"
+          },
+          "statusDate": 1487888747000,
+          "orderLineStatuses": {
+            "orderLineStatus": [
+              {
+                "status": "Shipped",
+                "statusQuantity": {
+                  "unitOfMeasurement": "EACH",
+                  "amount": "1"
+                },
+                "cancellationReason": null,
+                "trackingInfo": {
+                  "shipDateTime": 1485549015000,
+                  "carrierName": {
+                    "otherCarrier": null,
+                    "carrier": "FedEx"
+                  },
+                  "methodCode": "Value",
+                  "trackingNumber": "3445435443441221",
+                  "trackingURL": "http://walmart.narvar.com/walmart/tracking/Fedex?&type=MP&seller_id=801&promise_date=01/28/2017&dzip=94086&tracking_numbers=3445435443441221"
+                }
+              }
+            ]
+          },
+          "refund": {
+            "refundId": null,
+            "refundComments": null,
+            "refundCharges": {
+              "refundCharge": [
+                {
+                  "refundReason": "ItemNotReceivedByCustomer",
+                  "charge": {
+                    "chargeType": "PRODUCT",
+                    "chargeName": "Lost in Transit",
+                    "chargeAmount": {
+                      "currency": "USD",
+                      "amount": -0.01
+                    },
+                    "tax": null
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
