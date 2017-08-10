@@ -149,7 +149,7 @@ mod test {
   #[test]
   fn test_parse_list_elements_json() {
     use order::Order;
-    let mut r = Cursor::new(include_str!("../order/test_order_list_res.json").to_string());
+    let mut r = Cursor::new(include_str!("./order/test_order_list_res.json").to_string());
     let res = parse_list_elements_json::<Order, _>(StatusCode::Ok, &mut r, "order").unwrap();
     let meta = res.meta.unwrap();
     assert_eq!(meta.totalCount, 66);
@@ -160,7 +160,7 @@ mod test {
   #[test]
   fn test_parse_object_json() {
     use order::Order;
-    let mut r = Cursor::new(include_str!("../order/test_order.json").to_string());
+    let mut r = Cursor::new(include_str!("./order/test_order.json").to_string());
     let res = parse_object_json::<Order, _>(StatusCode::Ok, &mut r, "order").unwrap();
     assert_eq!(res.shippingInfo.estimatedDeliveryDate, 1485586800000);
   }
