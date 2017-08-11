@@ -1,7 +1,7 @@
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::{self, Value};
-use reqwest::{Response, StatusCode};
+use reqwest::{StatusCode, Response};
 use error::ApiResponseError;
 use std::io::Read;
 
@@ -20,6 +20,49 @@ pub struct ListResponse<T: Serialize> {
 }
 
 pub type Result<T> = ::std::result::Result<T, ApiResponseError>;
+
+pub trait JsonMaybe {
+  fn json_maybe<T: DeserializeOwned>(&mut self) -> Result<T>;
+}
+
+impl JsonMaybe for Response {
+  fn json_maybe<T: DeserializeOwned>(&mut self) -> Result<T> {
+    let status = self.status();
+
+    let mut body = String::new();
+    match self.read_to_string(&mut body) {
+      Err(err) => {
+        return Err(ApiResponseError {
+          status: status.clone(),
+          message: format!("read response: {}", err),
+          body: "".to_owned(),
+        });
+      },
+      _ => {},
+    }
+
+    if !status.is_success() {
+      return Err(ApiResponseError {
+        message: format!("status not ok: {}", status),
+        status: status.clone(),
+        body: body,
+      });
+    }
+
+    match serde_json::from_str::<T>(&body) {
+      Ok(v) => {
+        return Ok(v);
+      },
+      Err(err) => {
+        return Err(ApiResponseError {
+          message: format!("deserialize body: {}", err),
+          status: status.clone(),
+          body: body,
+        });
+      }
+    }
+  }
+}
 
 /// Get `meta` and `elements` from a JSON API response
 pub fn parse_list_elements_json<T, R>(status: StatusCode, reader: &mut R, key: &str) -> Result<ListResponse<T>> 

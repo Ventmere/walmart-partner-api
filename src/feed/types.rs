@@ -42,7 +42,19 @@ pub struct ItemIngestionStatus {
   pub sku: String,
   pub wpid: String,
   pub ingestionStatus: String,
-  pub ingestionErrors: Vec<Value>,
+  pub ingestionErrors: IngestionErrors,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct IngestionErrors {
+  pub ingestionError: Value,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct ItemDetails {
+  pub itemIngestionStatus: Vec<ItemIngestionStatus>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -50,12 +62,39 @@ pub struct ItemIngestionStatus {
 pub struct PartnerFeedResponse {
   pub feedId: String,
   pub feedStatus: String,
-  pub ingestionErrors: Vec<Value>,
-  pub itemsReceived: i32,
+  pub ingestionErrors: IngestionErrors,
+  pub itemsReceived: i32, 
   pub itemsSucceeded: i32,
   pub itemsFailed: i32,
   pub itemsProcessing: i32,
   pub offset: i32,
   pub limit: i32,
-  pub itemDetails: Vec<ItemIngestionStatus>,
+  pub itemDetails: ItemDetails,
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use serde_json::from_str;
+
+  #[test]
+  fn deserialize_partner_feed_response() {
+    from_str::<PartnerFeedResponse>(r##"{
+      "feedId": "117E39F0B7654B08A059457FB6E803FF@AQYBAAA",
+      "feedStatus": "PROCESSED",
+      "shipNode": null,
+      "ingestionErrors": {
+        "ingestionError": null
+      },
+      "itemsReceived": 1,
+      "itemsSucceeded": 0,
+      "itemsFailed": 1,
+      "itemsProcessing": 0,
+      "offset": 0,
+      "limit": 50,
+      "itemDetails": {
+        "itemIngestionStatus": []
+      }
+    }"##).unwrap();
+  }
 }

@@ -1,4 +1,5 @@
 use error::*;
+use response::JsonMaybe;
 mod types;
 
 pub use self::types::*;
@@ -15,7 +16,7 @@ impl InventoryApi for Client {
       ("sku", sku)
     ])?
       .send()?
-      .json::<Inventory>()
+      .json_maybe::<Inventory>()
       .map_err(Into::into)
   }
 
@@ -25,7 +26,7 @@ impl InventoryApi for Client {
     ])?
       .json(inventory)?
       .send()?
-      .json::<Inventory>()
+      .json_maybe::<Inventory>()
       .map_err(Into::into)
   }
 }

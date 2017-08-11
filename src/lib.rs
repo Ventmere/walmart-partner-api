@@ -7,10 +7,8 @@ extern crate serde;
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate serde_json;
 extern crate serde_qs;
-extern crate serde_xml_rs;
+extern crate multipart;
 extern crate rand;
-
-#[cfg(test)] extern crate dotenv;
 
 mod error;
 mod sign;
@@ -19,3 +17,5 @@ pub mod response;
 pub mod feed;
 pub mod order;
 pub mod inventory;
+
+pub use self::client::Client;

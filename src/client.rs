@@ -13,7 +13,7 @@ pub trait ExtendUrlParams {
 }
 
 impl ExtendUrlParams for () {
-  fn extend_url_params(self, url: &mut Url) {}
+  fn extend_url_params(self, _: &mut Url) {}
 }
 
 impl<'a> ExtendUrlParams for &'a str {
@@ -109,28 +109,28 @@ impl Client {
   }
 }
 
-#[cfg(test)]
-mod tests {
-  use super::*;
-  use dotenv::dotenv;
-  use std::env;
+// #[cfg(test)]
+// mod tests {
+//   use super::*;
+//   use dotenv::dotenv;
+//   use std::env;
 
-  // #[test]
-  // fn client() {
-  //   use std::io::Read;
-  //   dotenv().ok();
+//   #[test]
+//   fn client() {
+//     use std::io::Read;
+//     dotenv().ok();
 
-  //   let client = Client::new(&env::var("WALMART_CONSUMER_ID").unwrap(), &env::var("WALMART_PRIVATE_KEY").unwrap()).unwrap();
-  //   let mut res = client.request_json(Method::Get, "/v3/orders/fakeid", ()).unwrap().send().unwrap();
-  //   println!("status: {}", res.status());
-  //   let mut json = String::new();
-  //   res.read_to_string(&mut json).unwrap();
-  //   println!("body: {}", json);
-  //   {
-  //     use std::fs::File;
-  //     use std::io::Write;
-  //     let mut f = File::create("samples/order_not_found.json").unwrap();
-  //     write!(&mut f, "{}", json).unwrap()
-  //   }
-  // }
-}
+//     let client = Client::new(&env::var("WALMART_CONSUMER_ID").unwrap(), &env::var("WALMART_PRIVATE_KEY").unwrap()).unwrap();
+//     let mut res = client.request_json(Method::Get, "/v3/feeds/117E39F0B7654B08A059457FB6E803FF@AQYBAAA", ()).unwrap().send().unwrap();
+//     println!("status: {}", res.status());
+//     let mut json = String::new();
+//     res.read_to_string(&mut json).unwrap();
+//     println!("body: {}", json);
+//     {
+//       use std::fs::File;
+//       use std::io::Write;
+//       let mut f = File::create("samples/get_feed_aand_item_status.json").unwrap();
+//       write!(&mut f, "{}", json).unwrap()
+//     }
+//   }
+// }
