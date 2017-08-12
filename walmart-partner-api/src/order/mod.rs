@@ -1,6 +1,6 @@
 use error::*;
 use chrono::{DateTime, Utc};
-use serde_qs;
+use serde_urlencoded;
 
 mod types;
 
@@ -18,7 +18,7 @@ pub struct ReleasedQueryParams {
 }
 
 /// Query parameters for `get_all_orders`
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Default)]
 #[allow(non_snake_case)]
 pub struct QueryParams {
   pub sku: Option<String>,
@@ -58,14 +58,15 @@ pub trait OrderApi {
 
 impl OrderApi for Client {
   fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> Result<OrderList> {
-    let mut res = self.request_json(Method::Get, "/v3/orders/released", serde_qs::to_string(params)?)?
+    let qs = serde_urlencoded::to_string(params)?;
+    let mut res = self.request_json(Method::Get, "/v3/orders/released", qs)?
       .send()?;
     parse_list_elements_json(res.status(), &mut res, "order")
       .map_err(Into::into)
   }
 
   fn get_all_orders(&self, params: &QueryParams) -> Result<OrderList> {
-    let mut res = self.request_json(Method::Get, "/v3/orders", serde_qs::to_string(params)?)?
+    let mut res = self.request_json(Method::Get, "/v3/orders", serde_urlencoded::to_string(params)?)?
       .send()?;
     parse_list_elements_json(res.status(), &mut res, "order")
       .map_err(Into::into)

@@ -24,7 +24,9 @@ impl<'a> ExtendUrlParams for &'a str {
 
 impl<'a> ExtendUrlParams for String {
   fn extend_url_params(self, url: &mut Url) {
-    url.set_query(Some(self.as_ref()));
+    if !self.is_empty() {
+      url.set_query(Some(self.as_ref()));
+    }
   }
 }
 
@@ -65,12 +67,17 @@ impl Client {
     let timestamp = Utc::now();
     let timestamp = timestamp.timestamp() * 1000 + timestamp.timestamp_subsec_millis() as i64;
     let sign = self.sign.sign(url.as_str(), method.clone(), timestamp)?;
+
+    println!("request: url = {}", url);
+    println!("request: timestamp = {}", timestamp);
+    println!("request: sign = {}", sign);
+
     self.http.request(method.clone(), url)
       .map_err(Into::into)
       .map(|mut req| {
         let mut headers = Headers::new();
         let rid: String = thread_rng().gen_ascii_chars().take(10).collect();
-        headers.set_raw("WM_SVC.NAME", "Walmart Gateway API");
+        headers.set_raw("WM_SVC.NAME", "Walmart Marketplace");
         headers.set_raw("WM_QOS.CORRELATION_ID", rid.as_ref() as &str);
         headers.set_raw("WM_SEC.TIMESTAMP", timestamp.to_string().as_ref() as &str);
         headers.set_raw("WM_SEC.AUTH_SIGNATURE", sign.as_ref() as &str);

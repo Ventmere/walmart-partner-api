@@ -6,7 +6,7 @@ extern crate openssl;
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate serde_json;
-extern crate serde_qs;
+extern crate serde_urlencoded;
 extern crate multipart;
 extern crate rand;
 

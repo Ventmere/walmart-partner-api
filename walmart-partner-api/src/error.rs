@@ -9,7 +9,7 @@ error_chain! {
     Base64(::base64::DecodeError);
     OpenSSL(::openssl::error::ErrorStack);
     Api(ApiResponseError);
-    QueryString(::serde_qs::Error);
+    UrlEncoded(::serde_urlencoded::ser::Error);
   }
 }
 
