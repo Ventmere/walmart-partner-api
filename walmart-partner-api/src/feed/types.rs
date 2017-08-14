@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde_json::Value;
+use utils::deserialize_timestamp;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -18,12 +19,19 @@ pub struct FeedStatus {
   pub itemsFailed: i32,
   pub itemsProcessing: i32,
   pub feedStatus: String,
+  #[serde(deserialize_with="deserialize_timestamp")]
   pub feedDate: DateTime<Utc>,
+  #[serde(deserialize_with="deserialize_timestamp")]  
   pub modifiedDtm: DateTime<Utc>,
-  pub fileName: String,
+  pub fileName: Option<String>,
   pub itemDataErrorCount: i32,
   pub itemSystemErrorCount: i32,
   pub itemTimeoutErrorCount: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FeedStatusesResults {
+  pub feed: Vec<FeedStatus>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,7 +40,7 @@ pub struct FeedStatuses {
   pub totalResults: i32,
   pub offset: i32,
   pub limit: i32,
-  pub results: Vec<FeedStatus>,
+  pub results: FeedStatusesResults,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

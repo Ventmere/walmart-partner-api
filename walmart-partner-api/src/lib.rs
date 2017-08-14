@@ -13,6 +13,7 @@ extern crate rand;
 mod error;
 mod sign;
 mod client;
+mod utils;
 pub mod response;
 pub mod feed;
 pub mod order;
