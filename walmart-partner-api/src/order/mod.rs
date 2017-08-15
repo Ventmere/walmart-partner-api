@@ -46,18 +46,8 @@ pub struct ShipParams {
 
 pub type OrderList = ListResponse<Order>;
 
-pub trait OrderApi {
-  fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> Result<OrderList>;
-  fn get_all_orders(&self, params: &QueryParams) -> Result<OrderList>;
-  fn get_order(&self, purchase_order_id: &str) -> Result<Order>;
-  fn ack_order(&self, purchase_order_id: &str) -> Result<Order>;
-  // fn cancel_order_line(...) -> Result<Order>;
-  // fn refund_order_line(...) -> Result<Order>;
-  fn ship_order_line(&self, purchase_order_id: &str, params: &ShipParams) -> Result<Order>;
-}
-
-impl OrderApi for Client {
-  fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> Result<OrderList> {
+impl Client {
+  pub fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> Result<OrderList> {
     let qs = serde_urlencoded::to_string(params)?;
     let mut res = self.request_json(Method::Get, "/v3/orders/released", qs)?
       .send()?;
@@ -65,14 +55,14 @@ impl OrderApi for Client {
       .map_err(Into::into)
   }
 
-  fn get_all_orders(&self, params: &QueryParams) -> Result<OrderList> {
+  pub fn get_all_orders(&self, params: &QueryParams) -> Result<OrderList> {
     let mut res = self.request_json(Method::Get, "/v3/orders", serde_urlencoded::to_string(params)?)?
       .send()?;
     parse_list_elements_json(res.status(), &mut res, "order")
       .map_err(Into::into)
   }
 
-  fn get_order(&self, purchase_order_id: &str) -> Result<Order> {
+  pub fn get_order(&self, purchase_order_id: &str) -> Result<Order> {
     let path = format!("/v3/orders/{}", purchase_order_id);
     let mut res = self.request_json(Method::Get, &path, ())?
       .send()?;
@@ -88,7 +78,7 @@ impl OrderApi for Client {
       .map_err(Into::into)
   }
 
-  fn ship_order_line(&self, purchase_order_id: &str, params: &ShipParams) -> Result<Order> {
+  pub fn ship_order_line(&self, purchase_order_id: &str, params: &ShipParams) -> Result<Order> {
     use serde_json::Value;
     let timestamp: i64 = params.shipDateTime.timestamp() * 1000 + params.shipDateTime.timestamp_subsec_millis() as i64;
     let body = json!({

@@ -23,14 +23,8 @@ pub struct GetFeedAndItemStatusQuery {
   pub offset: Option<i32>,
 }
 
-pub trait FeedApi {
-  fn get_all_feed_statuses(&self, query: &GetAllFeedStatusesQuery) -> Result<FeedStatuses>;
-  fn get_feed_and_item_status(&self, feed_id: &str, query: &GetFeedAndItemStatusQuery) -> Result<PartnerFeedResponse>;
-  fn bulk_upload<R: Read + Send + 'static>(&self, feed_type: &str, feed: R) -> Result<FeedAck>;
-}
-
-impl FeedApi for Client {
-  fn get_all_feed_statuses(&self, query: &GetAllFeedStatusesQuery) -> Result<FeedStatuses> {
+impl Client {
+  pub fn get_all_feed_statuses(&self, query: &GetAllFeedStatusesQuery) -> Result<FeedStatuses> {
     let qs = serde_urlencoded::to_string(query)?;
     self.request_json(Method::Get, "/v3/feeds", qs)?
       .send()?
@@ -38,7 +32,7 @@ impl FeedApi for Client {
       .map_err(Into::into)
   }
 
-  fn get_feed_and_item_status(&self, feed_id: &str, query: &GetFeedAndItemStatusQuery) -> Result<PartnerFeedResponse> {
+  pub fn get_feed_and_item_status(&self, feed_id: &str, query: &GetFeedAndItemStatusQuery) -> Result<PartnerFeedResponse> {
     let path = format!("/v3/feeds/{}", feed_id);
     self.request_json(Method::Get, &path, serde_urlencoded::to_string(query)?)?
       .send()?
@@ -46,7 +40,7 @@ impl FeedApi for Client {
       .map_err(Into::into)
   }
 
-  fn bulk_upload<R: Read + Send + 'static>(&self, feed_type: &str, feed: R) -> Result<FeedAck> {
+  pub fn bulk_upload<R: Read + Send + 'static>(&self, feed_type: &str, feed: R) -> Result<FeedAck> {
     use multipart::client::lazy::Multipart;
     use reqwest::header::ContentType;
 
