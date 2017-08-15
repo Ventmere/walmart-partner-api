@@ -1,6 +1,5 @@
 use std::fs::File;
 use walmart_partner_api::Client;
-use walmart_partner_api::feed::*;
 
 pub fn upload(client: &Client, feed_type: &str, path: &str) {
   let f = File::open(path).unwrap();
