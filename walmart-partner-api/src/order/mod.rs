@@ -70,7 +70,7 @@ impl Client {
       .map_err(Into::into)
   }
 
-  fn ack_order(&self, purchase_order_id: &str) -> Result<Order> {
+  pub fn ack_order(&self, purchase_order_id: &str) -> Result<Order> {
     let path = format!("/v3/orders/{}/acknowledge", purchase_order_id);
     let mut res = self.request_json(Method::Post, &path, ())?
       .send()?;
