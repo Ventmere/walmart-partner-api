@@ -10,6 +10,8 @@ error_chain! {
     OpenSSL(::openssl::error::ErrorStack);
     Api(ApiResponseError);
     UrlEncoded(::serde_urlencoded::ser::Error);
+    Io(::std::io::Error);
+    Zip(::zip::result::ZipError);
   }
 }
 
@@ -22,7 +24,11 @@ pub struct ApiResponseError {
 
 impl fmt::Display for ApiResponseError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "API Error: status = '{}', message = '{}'", self.status, self.message)
+    write!(
+      f,
+      "API Error: status = '{}', message = '{}'",
+      self.status, self.message
+    )
   }
 }
 

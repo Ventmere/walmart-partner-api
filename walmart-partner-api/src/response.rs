@@ -19,6 +19,25 @@ pub struct ListResponse<T: Serialize> {
   pub elements: Vec<T>,
 }
 
+#[allow(non_snake_case)]
+impl<T: Serialize> ListResponse<T> {
+  pub fn get_next_cursor(&self) -> Option<&str> {
+    match *self {
+      ListResponse { meta: Some(ListMeta { nextCursor: Some(ref cursor), .. }), .. } => {
+        Some(&cursor)
+      }
+      _ => None,
+    }
+  }
+
+  pub fn get_total_count(&self) -> Option<i32> {
+    match *self {
+      ListResponse { meta: Some(ListMeta { totalCount, .. }), .. } => Some(totalCount),
+      _ => None,
+    }
+  }
+}
+
 pub type Result<T> = ::std::result::Result<T, ApiResponseError>;
 
 pub trait JsonMaybe {
@@ -37,8 +56,8 @@ impl JsonMaybe for Response {
           message: format!("read response: {}", err),
           body: "".to_owned(),
         });
-      },
-      _ => {},
+      }
+      _ => {}
     }
 
     if !status.is_success() {
@@ -52,7 +71,7 @@ impl JsonMaybe for Response {
     match serde_json::from_str::<T>(&body) {
       Ok(v) => {
         return Ok(v);
-      },
+      }
       Err(err) => {
         return Err(ApiResponseError {
           message: format!("deserialize body: {}", err),
@@ -65,10 +84,16 @@ impl JsonMaybe for Response {
 }
 
 /// Get `meta` and `elements` from a JSON API response
-pub fn parse_list_elements_json<T, R>(status: StatusCode, reader: &mut R, key: &str) -> Result<ListResponse<T>> 
-  where T: Serialize + DeserializeOwned, R: Read
+pub fn parse_list_elements_json<T, R>(
+  status: StatusCode,
+  reader: &mut R,
+  key: &str,
+) -> Result<ListResponse<T>>
+where
+  T: Serialize + DeserializeOwned,
+  R: Read,
 {
-  use std::collections::BTreeMap;  
+  use std::collections::BTreeMap;
 
   #[derive(Debug, Deserialize)]
   pub struct Inner {
@@ -85,12 +110,12 @@ pub fn parse_list_elements_json<T, R>(status: StatusCode, reader: &mut R, key: &
     return Ok(ListResponse {
       meta: None,
       elements: vec![],
-    })
+    });
   }
 
   let mut body = String::new();
   match reader.read_to_string(&mut body) {
-    _ => {},
+    _ => {}
   }
 
   if !status.is_success() {
@@ -120,7 +145,7 @@ pub fn parse_list_elements_json<T, R>(status: StatusCode, reader: &mut R, key: &
             meta: res.list.meta.into(),
             elements: elements,
           });
-        },
+        }
         Err(err) => {
           return Err(ApiResponseError {
             message: format!("deserialize json response elements: {}", err.to_string()),
@@ -129,7 +154,7 @@ pub fn parse_list_elements_json<T, R>(status: StatusCode, reader: &mut R, key: &
           });
         }
       }
-    },
+    }
     Err(err) => {
       return Err(ApiResponseError {
         message: format!("deserialize json response: {}", err.to_string()),
@@ -141,14 +166,16 @@ pub fn parse_list_elements_json<T, R>(status: StatusCode, reader: &mut R, key: &
 }
 
 /// Get single object from a JSON API response
-pub fn parse_object_json<T, R>(status: StatusCode, reader: &mut R, key: &str) -> Result<T> 
-  where T: Serialize + DeserializeOwned, R: Read
+pub fn parse_object_json<T, R>(status: StatusCode, reader: &mut R, key: &str) -> Result<T>
+where
+  T: Serialize + DeserializeOwned,
+  R: Read,
 {
   use std::collections::BTreeMap;
 
   let mut body = String::new();
   match reader.read_to_string(&mut body) {
-    _ => {},
+    _ => {}
   }
 
   if !status.is_success() {
@@ -164,7 +191,7 @@ pub fn parse_object_json<T, R>(status: StatusCode, reader: &mut R, key: &str) ->
       match obj.remove(key) {
         Some(value) => {
           return Ok(value);
-        },
+        }
         None => {
           return Err(ApiResponseError {
             message: format!("key '{}' was not found in resposne", key),
@@ -173,7 +200,7 @@ pub fn parse_object_json<T, R>(status: StatusCode, reader: &mut R, key: &str) ->
           });
         }
       }
-    },
+    }
     Err(err) => {
       return Err(ApiResponseError {
         message: format!("deserialize json response: {}", err.to_string()),

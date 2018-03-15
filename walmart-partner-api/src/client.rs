@@ -48,7 +48,11 @@ impl Client {
     Client::with_http_client(consumer_id, private_key, http)
   }
 
-  pub fn with_http_client(consumer_id: &str, private_key: &str, http: reqwest::Client) -> Result<Client> {
+  pub fn with_http_client(
+    consumer_id: &str,
+    private_key: &str,
+    http: reqwest::Client,
+  ) -> Result<Client> {
     Ok(Client {
       base_url: Url::parse(BASE_URL)?,
       sign: Signature::new(consumer_id, private_key)?,
@@ -56,8 +60,9 @@ impl Client {
     })
   }
 
-  fn request<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder> 
-    where P: ExtendUrlParams,
+  fn request<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
+  where
+    P: ExtendUrlParams,
   {
     use reqwest::header::Headers;
 
@@ -68,11 +73,13 @@ impl Client {
     let timestamp = timestamp.timestamp() * 1000 + timestamp.timestamp_subsec_millis() as i64;
     let sign = self.sign.sign(url.as_str(), method.clone(), timestamp)?;
 
-    println!("request: url = {}", url);
-    println!("request: timestamp = {}", timestamp);
-    println!("request: sign = {}", sign);
+    // println!("request: url = {}", url);
+    // println!("request: timestamp = {}", timestamp);
+    // println!("request: sign = {}", sign);
 
-    self.http.request(method.clone(), url)
+    self
+      .http
+      .request(method.clone(), url)
       .map_err(Into::into)
       .map(|mut req| {
         let mut headers = Headers::new();
@@ -88,29 +95,27 @@ impl Client {
       })
   }
 
-  pub fn request_json<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder> 
-    where P: ExtendUrlParams,
+  pub fn request_json<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
+  where
+    P: ExtendUrlParams,
   {
     use reqwest::header::{Accept, qitem};
     use reqwest::mime;
-    
+
     self.request(method, path, params).map(|mut req| {
-      req.header(Accept(vec![
-        qitem(mime::APPLICATION_JSON)
-      ]));
+      req.header(Accept(vec![qitem(mime::APPLICATION_JSON)]));
       req
     })
   }
 
-  pub fn request_xml<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder> 
-    where P: ExtendUrlParams,
+  pub fn request_xml<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
+  where
+    P: ExtendUrlParams,
   {
     use reqwest::header::{Accept, qitem};
-    
+
     self.request(method, path, params).map(|mut req| {
-      req.header(Accept(vec![
-        qitem("application/xml".parse().unwrap())
-      ]));
+      req.header(Accept(vec![qitem("application/xml".parse().unwrap())]));
       req
     })
   }
