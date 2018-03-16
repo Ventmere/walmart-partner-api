@@ -1,4 +1,5 @@
 extern crate base64;
+extern crate bigdecimal;
 extern crate chrono;
 extern crate csv;
 #[macro_use]
@@ -16,9 +17,8 @@ extern crate serde_urlencoded;
 extern crate tempfile;
 extern crate url;
 extern crate zip;
-extern crate bigdecimal;
 
-mod error;
+pub mod error;
 mod sign;
 mod client;
 mod utils;
