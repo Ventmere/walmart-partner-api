@@ -1,12 +1,12 @@
-use error::*;
 use chrono::{DateTime, Utc};
+use error::*;
 use serde_urlencoded;
 
 mod types;
 
 pub use self::types::*;
-use response::{ListResponse, parse_list_elements_json, parse_object_json};
-use client::{Method, Client};
+use client::{Client, Method};
+use response::{parse_list_elements_json, parse_object_json, ListResponse};
 
 /// Query parameters for `get_all_released_orders`
 #[derive(Debug, Serialize)]
@@ -94,8 +94,8 @@ impl Client {
 
   pub fn ship_order_line(&self, purchase_order_id: &str, params: &ShipParams) -> Result<Order> {
     use serde_json::Value;
-    let timestamp: i64 = params.shipDateTime.timestamp() * 1000 +
-      params.shipDateTime.timestamp_subsec_millis() as i64;
+    let timestamp: i64 =
+      params.shipDateTime.timestamp() * 1000 + params.shipDateTime.timestamp_subsec_millis() as i64;
     let body = json!({
       "orderShipment": {
         "orderLines": {
@@ -133,11 +133,9 @@ impl Client {
       .request_json(
         Method::Post,
         &path,
-        vec![
-      ("purchaseOrderId", purchase_order_id)
-    ],
+        vec![("purchaseOrderId", purchase_order_id)],
       )?
-      .json(&body)?
+      .json(&body)
       .send()?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }

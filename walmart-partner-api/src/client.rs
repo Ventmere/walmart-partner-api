@@ -1,9 +1,9 @@
-use reqwest;
-pub use reqwest::{Url, Method, Request, RequestBuilder};
-use error::*;
-use sign::Signature;
 use chrono::Utc;
+use error::*;
 use rand::{thread_rng, Rng};
+use reqwest;
+pub use reqwest::{Method, Request, RequestBuilder, Url};
+use sign::Signature;
 
 const BASE_URL: &'static str = "https://marketplace.walmartapis.com";
 const CHANNEL_TYPE: &'static str = "0f3e4dd4-0514-4346-b39d-af0e00ea066d";
@@ -44,7 +44,7 @@ pub struct Client {
 
 impl Client {
   pub fn new(consumer_id: &str, private_key: &str) -> Result<Client> {
-    let http = reqwest::Client::new()?;
+    let http = reqwest::Client::new();
     Client::with_http_client(consumer_id, private_key, http)
   }
 
@@ -77,29 +77,25 @@ impl Client {
     // println!("request: timestamp = {}", timestamp);
     // println!("request: sign = {}", sign);
 
-    self
-      .http
-      .request(method.clone(), url)
-      .map_err(Into::into)
-      .map(|mut req| {
-        let mut headers = Headers::new();
-        let rid: String = thread_rng().gen_ascii_chars().take(10).collect();
-        headers.set_raw("WM_SVC.NAME", "Walmart Marketplace");
-        headers.set_raw("WM_QOS.CORRELATION_ID", rid.as_ref() as &str);
-        headers.set_raw("WM_SEC.TIMESTAMP", timestamp.to_string().as_ref() as &str);
-        headers.set_raw("WM_SEC.AUTH_SIGNATURE", sign.as_ref() as &str);
-        headers.set_raw("WM_CONSUMER.CHANNEL.TYPE", CHANNEL_TYPE);
-        headers.set_raw("WM_CONSUMER.ID", self.sign.consumer_id().as_ref() as &str);
-        req.headers(headers);
-        req
-      })
+    let mut req = self.http.request(method.clone(), url);
+
+    let mut headers = Headers::new();
+    let rid: String = thread_rng().gen_ascii_chars().take(10).collect();
+    headers.set_raw("WM_SVC.NAME", "Walmart Marketplace");
+    headers.set_raw("WM_QOS.CORRELATION_ID", rid.as_ref() as &str);
+    headers.set_raw("WM_SEC.TIMESTAMP", timestamp.to_string().as_ref() as &str);
+    headers.set_raw("WM_SEC.AUTH_SIGNATURE", sign.as_ref() as &str);
+    headers.set_raw("WM_CONSUMER.CHANNEL.TYPE", CHANNEL_TYPE);
+    headers.set_raw("WM_CONSUMER.ID", self.sign.consumer_id().as_ref() as &str);
+    req.headers(headers);
+    Ok(req)
   }
 
   pub fn request_json<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
   where
     P: ExtendUrlParams,
   {
-    use reqwest::header::{Accept, qitem};
+    use reqwest::header::{qitem, Accept};
     use reqwest::mime;
 
     self.request(method, path, params).map(|mut req| {
@@ -112,7 +108,7 @@ impl Client {
   where
     P: ExtendUrlParams,
   {
-    use reqwest::header::{Accept, qitem};
+    use reqwest::header::{qitem, Accept};
 
     self.request(method, path, params).map(|mut req| {
       req.header(Accept(vec![qitem("application/xml".parse().unwrap())]));

@@ -3,7 +3,7 @@ use std::io::Read;
 use serde_urlencoded;
 mod item;
 
-pub use self::item::{ItemReport, ItemReportType};
+pub use self::item::{ItemReport, ItemReportRow, ItemReportType};
 use client::{Client, Method};
 
 pub trait ReportType {
