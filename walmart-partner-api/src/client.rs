@@ -6,7 +6,11 @@ pub use reqwest::{Method, Request, RequestBuilder, Url};
 use sign::Signature;
 
 const BASE_URL: &'static str = "https://marketplace.walmartapis.com";
-const CHANNEL_TYPE: &'static str = "0f3e4dd4-0514-4346-b39d-af0e00ea066d";
+
+pub enum WalmartMarketplace {
+  USA,
+  Canada,
+}
 
 pub trait ExtendUrlParams {
   fn extend_url_params(self, url: &mut Url);
@@ -37,23 +41,34 @@ impl<T1: AsRef<str>, T2: AsRef<str>> ExtendUrlParams for Vec<(T1, T2)> {
 }
 
 pub struct Client {
+  marketplace: WalmartMarketplace,
+  channel_type: String,
   base_url: Url,
   sign: Signature,
   http: reqwest::Client,
 }
 
 impl Client {
-  pub fn new(consumer_id: &str, private_key: &str) -> Result<Client> {
+  pub fn new(
+    marketplace: WalmartMarketplace,
+    channel_type: &str,
+    consumer_id: &str,
+    private_key: &str,
+  ) -> Result<Client> {
     let http = reqwest::Client::new();
-    Client::with_http_client(consumer_id, private_key, http)
+    Client::with_http_client(marketplace, channel_type, consumer_id, private_key, http)
   }
 
   pub fn with_http_client(
+    marketplace: WalmartMarketplace,
+    channel_type: &str,
     consumer_id: &str,
     private_key: &str,
     http: reqwest::Client,
   ) -> Result<Client> {
     Ok(Client {
+      marketplace,
+      channel_type: channel_type.to_string(),
       base_url: Url::parse(BASE_URL)?,
       sign: Signature::new(consumer_id, private_key)?,
       http: http,
@@ -66,7 +81,25 @@ impl Client {
   {
     use reqwest::header::Headers;
 
-    let mut url = self.base_url.join(path)?;
+    let mut url = match self.marketplace {
+      WalmartMarketplace::USA => self.base_url.join(path)?,
+      WalmartMarketplace::Canada => {
+        // add `ca` to url
+        let path = path
+          .split('/')
+          .enumerate()
+          .map(|(i, seg)| {
+            if i == 1 {
+              format!("{}/ca", seg)
+            } else {
+              seg.to_string()
+            }
+          })
+          .collect::<Vec<String>>()
+          .join("/");
+        self.base_url.join(&path)?
+      }
+    };
     params.extend_url_params(&mut url);
 
     let timestamp = Utc::now();
@@ -85,7 +118,7 @@ impl Client {
     headers.set_raw("WM_QOS.CORRELATION_ID", rid.as_ref() as &str);
     headers.set_raw("WM_SEC.TIMESTAMP", timestamp.to_string().as_ref() as &str);
     headers.set_raw("WM_SEC.AUTH_SIGNATURE", sign.as_ref() as &str);
-    headers.set_raw("WM_CONSUMER.CHANNEL.TYPE", CHANNEL_TYPE);
+    headers.set_raw("WM_CONSUMER.CHANNEL.TYPE", &self.channel_type as &str);
     headers.set_raw("WM_CONSUMER.ID", self.sign.consumer_id().as_ref() as &str);
     req.headers(headers);
     Ok(req)

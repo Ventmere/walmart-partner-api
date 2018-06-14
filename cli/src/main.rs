@@ -1,12 +1,12 @@
-extern crate walmart_partner_api;
-extern crate dotenv;
 extern crate chrono;
+extern crate dotenv;
+extern crate walmart_partner_api;
 #[macro_use]
 extern crate clap;
 extern crate serde_json;
 
 use std::env;
-use walmart_partner_api::Client;
+use walmart_partner_api::{Client, WalmartMarketplace};
 
 mod feed;
 mod order;
@@ -59,57 +59,54 @@ fn main() {
   ).get_matches();
 
   let client = Client::new(
+    match env::var("WALMART_MARKETPLACE").unwrap().as_ref() {
+      "USA" => WalmartMarketplace::USA,
+      "Canada" => WalmartMarketplace::Canada,
+      _ => unreachable!(),
+    },
+    &env::var("WALMART_CHANNEL_TYPE").unwrap(),
     &env::var("WALMART_CONSUMER_ID").unwrap(),
     &env::var("WALMART_PRIVATE_KEY").unwrap(),
   ).unwrap();
 
   match matches.subcommand() {
-    ("feed", Some(matches)) => {
-      match matches.subcommand() {
-        ("upload", Some(matches)) => {
-          feed::upload(
-            &client,
-            matches.value_of("feed_type").unwrap(),
-            matches.value_of("INPUT").unwrap(),
-          );
-        }
-        ("status", _) => {
-          feed::status(&client);
-        }
-        ("inspect", Some(matches)) => {
-          feed::inspect(&client, matches.value_of("FEED_ID").unwrap());
-        }
-        _ => {}
+    ("feed", Some(matches)) => match matches.subcommand() {
+      ("upload", Some(matches)) => {
+        feed::upload(
+          &client,
+          matches.value_of("feed_type").unwrap(),
+          matches.value_of("INPUT").unwrap(),
+        );
       }
-    }
-    ("order", Some(matches)) => {
-      match matches.subcommand() {
-        ("list", m) => {
-          order::list(&client, m.and_then(|m| m.value_of("STATUS")));
-        }
-        ("get", Some(m)) => {
-          order::get(&client, m.value_of("ORDER_ID").unwrap());
-        }
-        ("dump", _) => {
-          order::dump(&client);
-        }
-        ("ship", _) => {
-          order::ship(&client);
-        }
-        _ => {}
+      ("status", _) => {
+        feed::status(&client);
       }
-    }
-    ("report", Some(matches)) => {
-      match matches.subcommand() {
-        ("get", Some(matches)) => {
-          report::get(
-            &client,
-            matches.value_of("report_type").unwrap(),
-          );
-        }
-        _ => {}
+      ("inspect", Some(matches)) => {
+        feed::inspect(&client, matches.value_of("FEED_ID").unwrap());
       }
-    }
+      _ => {}
+    },
+    ("order", Some(matches)) => match matches.subcommand() {
+      ("list", m) => {
+        order::list(&client, m.and_then(|m| m.value_of("STATUS")));
+      }
+      ("get", Some(m)) => {
+        order::get(&client, m.value_of("ORDER_ID").unwrap());
+      }
+      ("dump", _) => {
+        order::dump(&client);
+      }
+      ("ship", _) => {
+        order::ship(&client);
+      }
+      _ => {}
+    },
+    ("report", Some(matches)) => match matches.subcommand() {
+      ("get", Some(matches)) => {
+        report::get(&client, matches.value_of("report_type").unwrap());
+      }
+      _ => {}
+    },
     _ => {}
   }
 }

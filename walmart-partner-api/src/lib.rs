@@ -18,14 +18,14 @@ extern crate tempfile;
 extern crate url;
 extern crate zip;
 
-pub mod error;
-mod sign;
 mod client;
-mod utils;
-pub mod response;
+pub mod error;
 pub mod feed;
-pub mod order;
 pub mod inventory;
+pub mod order;
 pub mod report;
+pub mod response;
+mod sign;
+mod utils;
 
-pub use self::client::Client;
+pub use self::client::{Client, WalmartMarketplace};

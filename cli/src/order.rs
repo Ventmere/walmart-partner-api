@@ -1,7 +1,7 @@
-use chrono::{Utc, Duration};
+use chrono::{Duration, Utc};
 use serde_json;
-use walmart_partner_api::Client;
 use walmart_partner_api::order::*;
+use walmart_partner_api::Client;
 
 pub fn list(client: &Client, status: Option<&str>) {
   let mut query: QueryParams = Default::default();
@@ -16,7 +16,7 @@ pub fn list(client: &Client, status: Option<&str>) {
 pub fn dump(client: &Client) {
   let mut query: QueryParams = Default::default();
   query.limit = Some(200);
-  let start_date = (Utc::now() - Duration::days(365)).date().and_hms(0, 0, 0);
+  let start_date = (Utc::now() - Duration::days(100)).date().and_hms(0, 0, 0);
   query.createdStartDate = Some(start_date);
 
   let res = client.get_all_orders(&query).unwrap();
