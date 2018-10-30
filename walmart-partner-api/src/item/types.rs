@@ -6,6 +6,7 @@ use xmltree::Element;
 
 /// Response of `get_all_items`
 #[derive(Debug, Serialize)]
+#[allow(non_snake_case)]
 pub struct GetAllItems {
   pub items: Vec<Item>,
 

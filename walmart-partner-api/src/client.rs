@@ -13,15 +13,6 @@ pub enum WalmartMarketplace {
   Canada,
 }
 
-impl WalmartMarketplace {
-  pub(crate) fn to_str(&self) -> &'static str {
-    match *self {
-      WalmartMarketplace::USA => "USA",
-      WalmartMarketplace::Canada => "Canada",
-    }
-  }
-}
-
 pub trait ExtendUrlParams {
   fn extend_url_params(self, url: &mut Url);
 }
