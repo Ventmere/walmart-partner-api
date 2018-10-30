@@ -9,14 +9,15 @@ use std::env;
 use walmart_partner_api::{Client, WalmartMarketplace};
 
 mod feed;
+mod item;
 mod order;
 mod report;
 
 fn main() {
-  dotenv::dotenv().ok();
   let matches = clap_app!(cli =>
     (version: "0.1")
     (about: "Walmart CLI")
+    (@arg ENV: -e --env +takes_value "Sets a custom env file")
     (@subcommand feed =>
       (about: "Feed API")
       (@subcommand upload =>
@@ -55,8 +56,29 @@ fn main() {
         (about: "get report")
         (@arg report_type: -t --type +required +takes_value "Sets the report type")
       )
+      (@subcommand get_raw =>
+        (about: "get report to file")
+        (@arg report_type: -t --type +required +takes_value "Sets the report type")
+        (@arg out: -o --out +required +takes_value "Sets the output path")
+      )
     )
-  ).get_matches();
+    (@subcommand item =>
+      (about: "Item API")
+      (@subcommand dump =>
+        (about: "dump items")
+      )
+    )
+  )
+  .get_matches();
+
+  match matches.value_of("ENV") {
+    Some(path) => {
+      dotenv::from_path(::std::path::Path::new(path)).unwrap();
+    }
+    None => {
+      dotenv::dotenv().unwrap();
+    }
+  }
 
   let client = Client::new(
     match env::var("WALMART_MARKETPLACE").unwrap().as_ref() {
@@ -67,7 +89,8 @@ fn main() {
     &env::var("WALMART_CHANNEL_TYPE").unwrap(),
     &env::var("WALMART_CONSUMER_ID").unwrap(),
     &env::var("WALMART_PRIVATE_KEY").unwrap(),
-  ).unwrap();
+  )
+  .unwrap();
 
   match matches.subcommand() {
     ("feed", Some(matches)) => match matches.subcommand() {
@@ -104,6 +127,19 @@ fn main() {
     ("report", Some(matches)) => match matches.subcommand() {
       ("get", Some(matches)) => {
         report::get(&client, matches.value_of("report_type").unwrap());
+      }
+      ("get_raw", Some(matches)) => {
+        report::get_raw(
+          &client,
+          matches.value_of("report_type").unwrap(),
+          matches.value_of("out").unwrap(),
+        );
+      }
+      _ => {}
+    },
+    ("item", Some(matches)) => match matches.subcommand() {
+      ("dump", _) => {
+        item::dump(&client);
       }
       _ => {}
     },

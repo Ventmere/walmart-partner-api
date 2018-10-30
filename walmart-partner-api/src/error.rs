@@ -1,6 +1,6 @@
+use reqwest::StatusCode;
 use std::error;
 use std::fmt;
-use reqwest::StatusCode;
 
 error_chain! {
   foreign_links {
@@ -12,6 +12,7 @@ error_chain! {
     UrlEncoded(::serde_urlencoded::ser::Error);
     Io(::std::io::Error);
     Zip(::zip::result::ZipError);
+    XmlParse(::xmltree::ParseError);
   }
 }
 

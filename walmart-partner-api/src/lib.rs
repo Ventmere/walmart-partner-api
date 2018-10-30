@@ -16,16 +16,19 @@ extern crate serde_json;
 extern crate serde_urlencoded;
 extern crate tempfile;
 extern crate url;
+extern crate xmltree;
 extern crate zip;
 
 mod client;
 pub mod error;
 pub mod feed;
 pub mod inventory;
+pub mod item;
 pub mod order;
 pub mod report;
 pub mod response;
 mod sign;
 mod utils;
+mod xml;
 
 pub use self::client::{Client, WalmartMarketplace};

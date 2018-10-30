@@ -7,9 +7,19 @@ use sign::Signature;
 
 const BASE_URL: &'static str = "https://marketplace.walmartapis.com";
 
+#[derive(Debug, Clone, Copy)]
 pub enum WalmartMarketplace {
   USA,
   Canada,
+}
+
+impl WalmartMarketplace {
+  pub(crate) fn to_str(&self) -> &'static str {
+    match *self {
+      WalmartMarketplace::USA => "USA",
+      WalmartMarketplace::Canada => "Canada",
+    }
+  }
 }
 
 pub trait ExtendUrlParams {
@@ -147,6 +157,10 @@ impl Client {
       req.header(Accept(vec![qitem("application/xml".parse().unwrap())]));
       req
     })
+  }
+
+  pub(crate) fn get_marketplace(&self) -> WalmartMarketplace {
+    self.marketplace
   }
 }
 

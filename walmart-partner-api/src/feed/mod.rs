@@ -1,11 +1,11 @@
-use std::io::Read;
 use error::*;
 use response::JsonMaybe;
+use std::io::Read;
 mod types;
 use serde_urlencoded;
 
 pub use self::types::*;
-use client::{Method, Client};
+use client::{Client, Method};
 
 #[derive(Debug, Serialize, Default)]
 #[allow(non_snake_case)]
@@ -26,15 +26,21 @@ pub struct GetFeedAndItemStatusQuery {
 impl Client {
   pub fn get_all_feed_statuses(&self, query: &GetAllFeedStatusesQuery) -> Result<FeedStatuses> {
     let qs = serde_urlencoded::to_string(query)?;
-    self.request_json(Method::Get, "/v3/feeds", qs)?
+    self
+      .request_json(Method::Get, "/v3/feeds", qs)?
       .send()?
       .json_maybe::<FeedStatuses>()
       .map_err(Into::into)
   }
 
-  pub fn get_feed_and_item_status(&self, feed_id: &str, query: &GetFeedAndItemStatusQuery) -> Result<PartnerFeedResponse> {
+  pub fn get_feed_and_item_status(
+    &self,
+    feed_id: &str,
+    query: &GetFeedAndItemStatusQuery,
+  ) -> Result<PartnerFeedResponse> {
     let path = format!("/v3/feeds/{}", feed_id);
-    self.request_json(Method::Get, &path, serde_urlencoded::to_string(query)?)?
+    self
+      .request_json(Method::Get, &path, serde_urlencoded::to_string(query)?)?
       .send()?
       .json_maybe::<PartnerFeedResponse>()
       .map_err(Into::into)
@@ -52,9 +58,8 @@ impl Client {
       .read_to_end(&mut multipart_buffer)
       .unwrap();
 
-    self.request_json(Method::Post, "/v2/feeds", vec![
-      ("feedType", feed_type)
-    ])?
+    self
+      .request_json(Method::Post, "/v2/feeds", vec![("feedType", feed_type)])?
       .body(multipart_buffer)
       .header(ContentType("multipart/form-data".parse().unwrap()))
       .send()?

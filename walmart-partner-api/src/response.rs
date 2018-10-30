@@ -1,8 +1,8 @@
-use serde::Serialize;
-use serde::de::DeserializeOwned;
-use serde_json::{self, Value};
-use reqwest::{StatusCode, Response};
 use error::ApiResponseError;
+use reqwest::{Response, StatusCode};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use serde_json::{self, Value};
 use std::io::Read;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -23,16 +23,23 @@ pub struct ListResponse<T: Serialize> {
 impl<T: Serialize> ListResponse<T> {
   pub fn get_next_cursor(&self) -> Option<&str> {
     match *self {
-      ListResponse { meta: Some(ListMeta { nextCursor: Some(ref cursor), .. }), .. } => {
-        Some(&cursor)
-      }
+      ListResponse {
+        meta: Some(ListMeta {
+          nextCursor: Some(ref cursor),
+          ..
+        }),
+        ..
+      } => Some(&cursor),
       _ => None,
     }
   }
 
   pub fn get_total_count(&self) -> Option<i32> {
     match *self {
-      ListResponse { meta: Some(ListMeta { totalCount, .. }), .. } => Some(totalCount),
+      ListResponse {
+        meta: Some(ListMeta { totalCount, .. }),
+        ..
+      } => Some(totalCount),
       _ => None,
     }
   }
@@ -187,20 +194,18 @@ where
   }
 
   match serde_json::from_str::<BTreeMap<String, T>>(&body) {
-    Ok(mut obj) => {
-      match obj.remove(key) {
-        Some(value) => {
-          return Ok(value);
-        }
-        None => {
-          return Err(ApiResponseError {
-            message: format!("key '{}' was not found in resposne", key),
-            status: status.clone(),
-            body: body,
-          });
-        }
+    Ok(mut obj) => match obj.remove(key) {
+      Some(value) => {
+        return Ok(value);
       }
-    }
+      None => {
+        return Err(ApiResponseError {
+          message: format!("key '{}' was not found in resposne", key),
+          status: status.clone(),
+          body: body,
+        });
+      }
+    },
     Err(err) => {
       return Err(ApiResponseError {
         message: format!("deserialize json response: {}", err.to_string()),

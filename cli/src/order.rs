@@ -32,7 +32,7 @@ pub fn dump(client: &Client) {
     //   next_cursor
     // );
     elements.append(&mut res.elements);
-    ::std::thread::sleep_ms(1000);
+    ::std::thread::sleep(::std::time::Duration::from_secs(1));
   }
 
   println!("{}", serde_json::to_string_pretty(&elements).unwrap());
