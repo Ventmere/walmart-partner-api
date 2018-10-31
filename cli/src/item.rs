@@ -1,3 +1,4 @@
+use serde_json;
 use walmart_partner_api::item::*;
 use walmart_partner_api::Client;
 
@@ -26,5 +27,5 @@ pub fn dump(client: &Client) {
 
   println!("totalItems = {}", items.len());
 
-  println!("{:#?}", items);
+  println!("{}", serde_json::to_string_pretty(&items).unwrap());
 }
