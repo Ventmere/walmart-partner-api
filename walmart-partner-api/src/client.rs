@@ -1,8 +1,8 @@
 use chrono::Utc;
-use error::*;
 use rand::{thread_rng, Rng};
 use reqwest;
 pub use reqwest::{Method, Request, RequestBuilder, Url};
+use result::*;
 use sign::Signature;
 
 const BASE_URL: &'static str = "https://marketplace.walmartapis.com";
@@ -55,7 +55,7 @@ impl Client {
     channel_type: &str,
     consumer_id: &str,
     private_key: &str,
-  ) -> Result<Client> {
+  ) -> WalmartResult<Client> {
     let http = reqwest::Client::new();
     Client::with_http_client(marketplace, channel_type, consumer_id, private_key, http)
   }
@@ -66,7 +66,7 @@ impl Client {
     consumer_id: &str,
     private_key: &str,
     http: reqwest::Client,
-  ) -> Result<Client> {
+  ) -> WalmartResult<Client> {
     Ok(Client {
       marketplace,
       channel_type: channel_type.to_string(),
@@ -76,7 +76,7 @@ impl Client {
     })
   }
 
-  fn request<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
+  fn request<P>(&self, method: Method, path: &str, params: P) -> WalmartResult<RequestBuilder>
   where
     P: ExtendUrlParams,
   {
@@ -125,7 +125,12 @@ impl Client {
     Ok(req)
   }
 
-  pub fn request_json<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
+  pub fn request_json<P>(
+    &self,
+    method: Method,
+    path: &str,
+    params: P,
+  ) -> WalmartResult<RequestBuilder>
   where
     P: ExtendUrlParams,
   {
@@ -138,7 +143,12 @@ impl Client {
     })
   }
 
-  pub fn request_xml<P>(&self, method: Method, path: &str, params: P) -> Result<RequestBuilder>
+  pub fn request_xml<P>(
+    &self,
+    method: Method,
+    path: &str,
+    params: P,
+  ) -> WalmartResult<RequestBuilder>
   where
     P: ExtendUrlParams,
   {

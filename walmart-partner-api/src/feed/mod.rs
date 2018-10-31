@@ -1,5 +1,5 @@
-use error::*;
 use response::JsonMaybe;
+use result::*;
 use std::io::Read;
 mod types;
 use serde_urlencoded;
@@ -24,7 +24,10 @@ pub struct GetFeedAndItemStatusQuery {
 }
 
 impl Client {
-  pub fn get_all_feed_statuses(&self, query: &GetAllFeedStatusesQuery) -> Result<FeedStatuses> {
+  pub fn get_all_feed_statuses(
+    &self,
+    query: &GetAllFeedStatusesQuery,
+  ) -> WalmartResult<FeedStatuses> {
     let qs = serde_urlencoded::to_string(query)?;
     self
       .request_json(Method::Get, "/v3/feeds", qs)?
@@ -37,7 +40,7 @@ impl Client {
     &self,
     feed_id: &str,
     query: &GetFeedAndItemStatusQuery,
-  ) -> Result<PartnerFeedResponse> {
+  ) -> WalmartResult<PartnerFeedResponse> {
     let path = format!("/v3/feeds/{}", feed_id);
     self
       .request_json(Method::Get, &path, serde_urlencoded::to_string(query)?)?
@@ -46,7 +49,11 @@ impl Client {
       .map_err(Into::into)
   }
 
-  pub fn bulk_upload<R: Read + Send + 'static>(&self, feed_type: &str, feed: R) -> Result<FeedAck> {
+  pub fn bulk_upload<R: Read + Send + 'static>(
+    &self,
+    feed_type: &str,
+    feed: R,
+  ) -> WalmartResult<FeedAck> {
     use multipart::client::lazy::Multipart;
     use reqwest::header::ContentType;
 

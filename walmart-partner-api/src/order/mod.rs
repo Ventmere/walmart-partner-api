@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use error::*;
+use result::*;
 use serde_urlencoded;
 
 mod types;
@@ -47,7 +47,7 @@ pub struct ShipParams {
 pub type OrderList = ListResponse<Order>;
 
 impl Client {
-  pub fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> Result<OrderList> {
+  pub fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> WalmartResult<OrderList> {
     let qs = serde_urlencoded::to_string(params)?;
     let mut res = self
       .request_json(Method::Get, "/v3/orders/released", qs)?
@@ -55,7 +55,7 @@ impl Client {
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
-  pub fn get_all_orders(&self, params: &QueryParams) -> Result<OrderList> {
+  pub fn get_all_orders(&self, params: &QueryParams) -> WalmartResult<OrderList> {
     let mut res = self
       .request_json(
         Method::Get,
@@ -66,7 +66,7 @@ impl Client {
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
-  pub fn get_all_orders_by_next_cursor(&self, next_cursor: &str) -> Result<OrderList> {
+  pub fn get_all_orders_by_next_cursor(&self, next_cursor: &str) -> WalmartResult<OrderList> {
     use url::form_urlencoded;
     let mut res = self
       .request_json(
@@ -80,19 +80,23 @@ impl Client {
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
-  pub fn get_order(&self, purchase_order_id: &str) -> Result<Order> {
+  pub fn get_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}", purchase_order_id);
     let mut res = self.request_json(Method::Get, &path, ())?.send()?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
-  pub fn ack_order(&self, purchase_order_id: &str) -> Result<Order> {
+  pub fn ack_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}/acknowledge", purchase_order_id);
     let mut res = self.request_json(Method::Post, &path, ())?.send()?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
-  pub fn ship_order_line(&self, purchase_order_id: &str, params: &ShipParams) -> Result<Order> {
+  pub fn ship_order_line(
+    &self,
+    purchase_order_id: &str,
+    params: &ShipParams,
+  ) -> WalmartResult<Order> {
     use serde_json::Value;
     let timestamp: i64 =
       params.shipDateTime.timestamp() * 1000 + params.shipDateTime.timestamp_subsec_millis() as i64;

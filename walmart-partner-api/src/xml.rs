@@ -1,9 +1,9 @@
-use error::*;
 use reqwest::Response;
+use result::*;
 use xmltree::Element;
 
 pub trait FromXmlElement: Sized {
-  fn from_xml_element(elem: Element) -> Result<Self>;
+  fn from_xml_element(elem: Element) -> WalmartResult<Self>;
 }
 
 pub struct Xml<T> {
@@ -23,7 +23,7 @@ impl<T> Xml<T>
 where
   T: FromXmlElement,
 {
-  pub fn from_res(res: &mut Response) -> Result<Self> {
+  pub fn from_res(res: &mut Response) -> WalmartResult<Self> {
     use std::io::Cursor;
 
     let status = res.status();

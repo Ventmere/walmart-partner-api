@@ -1,5 +1,5 @@
-use error::ApiResponseError;
 use reqwest::{Response, StatusCode};
+use result::ApiResponseError;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::{self, Value};

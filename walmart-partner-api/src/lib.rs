@@ -2,8 +2,9 @@ extern crate base64;
 extern crate bigdecimal;
 extern crate chrono;
 extern crate csv;
+extern crate failure;
 #[macro_use]
-extern crate error_chain;
+extern crate failure_derive;
 extern crate multipart;
 extern crate openssl;
 extern crate rand;
@@ -20,13 +21,13 @@ extern crate xmltree;
 extern crate zip;
 
 mod client;
-pub mod error;
 pub mod feed;
 pub mod inventory;
 pub mod item;
 pub mod order;
 pub mod report;
 pub mod response;
+pub mod result;
 mod sign;
 mod utils;
 mod xml;

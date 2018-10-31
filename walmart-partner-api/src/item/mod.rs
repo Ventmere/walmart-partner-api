@@ -1,4 +1,4 @@
-use error::*;
+use result::*;
 mod types;
 use client::{Client, Method};
 use xml::Xml;
@@ -30,7 +30,7 @@ impl Client {
   pub fn get_all_items(
     &self,
     params: &GetAllItemsQueryParams,
-  ) -> Result<(Xml<GetAllItems>, Option<GetAllItemsQueryParams>)> {
+  ) -> WalmartResult<(Xml<GetAllItems>, Option<GetAllItemsQueryParams>)> {
     let qs = serde_urlencoded::to_string(params)?;
     let mut res = self.request_xml(Method::Get, "/v3/items", qs)?.send()?;
 

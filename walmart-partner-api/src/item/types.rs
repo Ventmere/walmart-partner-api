@@ -1,6 +1,6 @@
 use super::GetAllItemsQueryParams;
 use client::WalmartMarketplace;
-use error::*;
+use result::*;
 use xml::*;
 use xmltree::Element;
 
@@ -75,7 +75,7 @@ pub struct Item {
 }
 
 impl FromXmlElement for GetAllItems {
-  fn from_xml_element(elem: Element) -> Result<Self> {
+  fn from_xml_element(elem: Element) -> WalmartResult<Self> {
     let items = elem
       .children
       .iter()

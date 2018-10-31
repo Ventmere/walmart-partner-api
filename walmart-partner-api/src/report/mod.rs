@@ -1,4 +1,4 @@
-use error::*;
+use result::*;
 use serde_urlencoded;
 use std::io::{Read, Write};
 mod item;
@@ -10,7 +10,7 @@ pub trait ReportType {
   type Data;
 
   fn report_type() -> &'static str;
-  fn deserialize<R: Read>(r: R) -> Result<Self::Data>;
+  fn deserialize<R: Read>(r: R) -> WalmartResult<Self::Data>;
 }
 
 #[derive(Debug, Serialize, Default)]
@@ -21,7 +21,7 @@ pub struct GetReportQuery<'a> {
 }
 
 impl Client {
-  pub fn get_report<R: ReportType>(&self) -> Result<R::Data> {
+  pub fn get_report<R: ReportType>(&self) -> WalmartResult<R::Data> {
     let qs = serde_urlencoded::to_string(&GetReportQuery {
       type_: R::report_type(),
     })?;
@@ -30,7 +30,7 @@ impl Client {
       .send()?;
     R::deserialize(res)
   }
-  pub fn get_report_raw<W: Write>(&self, type_: &str, mut w: W) -> Result<u64> {
+  pub fn get_report_raw<W: Write>(&self, type_: &str, mut w: W) -> WalmartResult<u64> {
     let qs = serde_urlencoded::to_string(&GetReportQuery { type_ })?;
     let mut res = self
       .request_json(Method::Get, "/v2/getReport", qs)?

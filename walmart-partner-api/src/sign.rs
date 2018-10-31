@@ -2,14 +2,14 @@
 //!
 //! [Walmart Documentation](https://developer.walmart.com/#/apicenter/contentProvider#authentication)
 
-use reqwest::Method;
+use base64::encode;
+use openssl::hash::MessageDigest;
+use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
 use openssl::sign::Signer;
-use openssl::pkey::PKey;
-use openssl::hash::MessageDigest;
-use base64::encode;
+use reqwest::Method;
 
-use error::*;
+use result::*;
 
 pub struct Signature {
   consumer_id: String,
@@ -18,7 +18,7 @@ pub struct Signature {
 
 impl Signature {
   /// Cosntruct a new `Signature`
-  pub fn new(consumer_id: &str, private_key: &str) -> Result<Signature> {
+  pub fn new(consumer_id: &str, private_key: &str) -> WalmartResult<Signature> {
     let pem_key = format!(
       "-----BEGIN PRIVATE KEY-----\n{}\n-----END PRIVATE KEY-----",
       private_key
@@ -32,7 +32,7 @@ impl Signature {
   }
 
   /// Sign a request
-  pub fn sign(&self, url: &str, method: Method, timestamp: i64) -> Result<String> {
+  pub fn sign(&self, url: &str, method: Method, timestamp: i64) -> WalmartResult<String> {
     let input = format!(
       "{consumer_id}\n{url}\n{method}\n{timestamp}\n",
       consumer_id = self.consumer_id,
