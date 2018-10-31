@@ -3,20 +3,28 @@ use response::JsonMaybe;
 mod types;
 
 pub use self::types::*;
-use client::{Client, Method};
+use client::{Client, Method, WalmartMarketplace};
 
 impl Client {
   pub fn get_item_inventory(&self, sku: &str) -> Result<Inventory> {
+    let path = match self.get_marketplace() {
+      WalmartMarketplace::USA => "/v2/inventory",
+      WalmartMarketplace::Canada => "/v3/inventory",
+    };
     self
-      .request_json(Method::Get, "/v2/inventory", vec![("sku", sku)])?
+      .request_json(Method::Get, path, vec![("sku", sku)])?
       .send()?
       .json_maybe::<Inventory>()
       .map_err(Into::into)
   }
 
   pub fn update_item_inventory(&self, inventory: &Inventory) -> Result<Inventory> {
+    let path = match self.get_marketplace() {
+      WalmartMarketplace::USA => "/v2/inventory",
+      WalmartMarketplace::Canada => "/v3/inventory",
+    };
     self
-      .request_json(Method::Put, "/v2/inventory", vec![("sku", &inventory.sku)])?
+      .request_json(Method::Put, path, vec![("sku", &inventory.sku)])?
       .json(inventory)
       .send()?
       .json_maybe::<Inventory>()

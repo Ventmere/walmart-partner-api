@@ -9,6 +9,7 @@ use std::env;
 use walmart_partner_api::{Client, WalmartMarketplace};
 
 mod feed;
+mod inventory;
 mod item;
 mod order;
 mod report;
@@ -66,6 +67,15 @@ fn main() {
       (about: "Item API")
       (@subcommand dump =>
         (about: "dump items")
+      )
+    )
+    (@subcommand inventory =>
+      (about: "Inventory API")
+      (@subcommand set =>
+        (about: "set sku inventory")
+        (@arg sku: -s --sku +required +takes_value "SKU")
+        (@arg quantity: -q --quantity +required +takes_value "Quantity")
+        (@arg lagtime: -l --lagtime +required +takes_value "Fulfillment Lag Time")
       )
     )
   )
@@ -140,6 +150,15 @@ fn main() {
     ("item", Some(matches)) => match matches.subcommand() {
       ("dump", _) => {
         item::dump(&client);
+      }
+      _ => {}
+    },
+    ("inventory", Some(matches)) => match matches.subcommand() {
+      ("set", Some(m)) => {
+        let sku = m.value_of("sku").unwrap();
+        let quantity = m.value_of("quantity").unwrap().parse().unwrap();
+        let lagtime = m.value_of("lagtime").unwrap().parse().unwrap();
+        inventory::set_inventory(&client, &sku, quantity, lagtime);
       }
       _ => {}
     },
