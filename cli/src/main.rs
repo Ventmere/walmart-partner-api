@@ -50,6 +50,10 @@ fn main() {
       (@subcommand ship =>
         (about: "ship order")
       )
+      (@subcommand ack =>
+        (about: "ack order")
+        (@arg PO_ID: +required "Sets the po id")
+      )
     )
     (@subcommand report =>
       (about: "Report API")
@@ -131,6 +135,9 @@ fn main() {
       }
       ("ship", _) => {
         order::ship(&client);
+      }
+      ("ack", Some(m)) => {
+        order::ack(&client, m.value_of("PO_ID").unwrap());
       }
       _ => {}
     },

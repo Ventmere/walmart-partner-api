@@ -56,3 +56,8 @@ pub fn ship(client: &Client) {
   let res = client.ship_order_line("2581004628475", &params).unwrap();
   println!("{}", serde_json::to_string_pretty(&res).unwrap());
 }
+
+pub fn ack(client: &Client, po_id: &str) {
+  let res = client.ack_order(po_id).unwrap();
+  println!("{}", serde_json::to_string_pretty(&res).unwrap());
+}

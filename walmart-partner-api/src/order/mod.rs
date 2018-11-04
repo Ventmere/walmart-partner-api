@@ -88,7 +88,10 @@ impl Client {
 
   pub fn ack_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}/acknowledge", purchase_order_id);
-    let mut res = self.request_json(Method::Post, &path, ())?.send()?;
+    let mut res = self
+      .request_json(Method::Post, &path, ())?
+      .json(&Vec::<i32>::new())
+      .send()?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
