@@ -49,6 +49,11 @@ fn main() {
       )
       (@subcommand ship =>
         (about: "ship order")
+        (@arg ORDER_ID: +required "Sets the order id")
+        (@arg line_number: -n --line_number +takes_value "Sets the line number, default 1")
+        (@arg method: -m --method_code +takes_value "Sets the method code, default 'Standard'")
+        (@arg carrier_name: -c --carrier_name +required +takes_value "Sets the carrier name")
+        (@arg tracking_number: -t --tracking_number +required +takes_value "Sets the tracking number")
       )
       (@subcommand ack =>
         (about: "ack order")
@@ -133,8 +138,8 @@ fn main() {
       ("dump", _) => {
         order::dump(&client);
       }
-      ("ship", _) => {
-        order::ship(&client);
+      ("ship", Some(m)) => {
+        order::ship(&client, m);
       }
       ("ack", Some(m)) => {
         order::ack(&client, m.value_of("PO_ID").unwrap());

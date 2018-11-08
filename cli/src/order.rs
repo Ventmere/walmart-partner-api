@@ -1,4 +1,5 @@
 use chrono::{Duration, Utc};
+use clap::ArgMatches;
 use serde_json;
 use walmart_partner_api::order::*;
 use walmart_partner_api::Client;
@@ -43,17 +44,28 @@ pub fn get(client: &Client, id: &str) {
   println!("{}", serde_json::to_string_pretty(&res).unwrap());
 }
 
-pub fn ship(client: &Client) {
+pub fn ship(client: &Client, m: &ArgMatches) {
   use chrono::Utc;
   let params = ShipParams {
-    lineNumber: "1".to_string(),
+    lineNumber: m
+      .value_of("line_number")
+      .map(ToString::to_string)
+      .unwrap_or_else(|| "1".to_string()),
     shipDateTime: Utc::now(),
-    carrierName: "FedEx".to_string(),
-    methodCode: "Standard".to_owned(),
-    trackingNumber: "714510651980".to_string(),
+    carrierName: m.value_of("carrier_name").map(ToString::to_string).unwrap(),
+    methodCode: m
+      .value_of("method")
+      .map(ToString::to_string)
+      .unwrap_or_else(|| "Standard".to_string()),
+    trackingNumber: m
+      .value_of("tracking_number")
+      .map(ToString::to_string)
+      .unwrap(),
     trackingURL: "".to_string(),
   };
-  let res = client.ship_order_line("2581004628475", &params).unwrap();
+  let res = client
+    .ship_order_line(m.value_of("ORDER_ID").unwrap(), &params)
+    .unwrap();
   println!("{}", serde_json::to_string_pretty(&res).unwrap());
 }
 
