@@ -8,7 +8,7 @@ pub fn list(client: &Client, status: Option<&str>) {
   let mut query: QueryParams = Default::default();
   let start_date = (Utc::now() - Duration::days(7)).date().and_hms(0, 0, 0);
   query.createdStartDate = Some(start_date);
-  // query.createdEndDate = Some(Utc::now());
+  query.createdEndDate = Some(Utc::now());
   query.status = status.or(Some("Created")).map(|s| s.to_owned());
   let res = client.get_all_orders(&query).unwrap();
   println!("{:#?}", res);
@@ -52,7 +52,7 @@ pub fn ship(client: &Client, m: &ArgMatches) {
       .map(ToString::to_string)
       .unwrap_or_else(|| "1".to_string()),
     shipDateTime: Utc::now(),
-    carrierName: m.value_of("carrier_name").map(ToString::to_string).unwrap(),
+    carrierName: m.value_of("carrier_name").map(ToString::to_string),
     methodCode: m
       .value_of("method")
       .map(ToString::to_string)
@@ -61,7 +61,13 @@ pub fn ship(client: &Client, m: &ArgMatches) {
       .value_of("tracking_number")
       .map(ToString::to_string)
       .unwrap(),
-    trackingURL: "".to_string(),
+    trackingURL: m
+      .value_of("tracking_url")
+      .map(ToString::to_string)
+      .unwrap_or_default(),
+    otherCarrier: m.value_of("other_carrier").map(ToString::to_string),
+    unitOfMeasurement: m.value_of("unit_of_measurement").map(ToString::to_string),
+    amount: m.value_of("amount").map(ToString::to_string),
   };
   let res = client
     .ship_order_line(m.value_of("ORDER_ID").unwrap(), &params)

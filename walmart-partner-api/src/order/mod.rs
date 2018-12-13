@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use result::*;
 use serde_urlencoded;
+use serde_json::Value;
 
 mod types;
 
@@ -33,15 +34,49 @@ pub struct QueryParams {
   pub nextCursor: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct ShipParams {
   pub lineNumber: String,
   pub shipDateTime: DateTime<Utc>,
-  pub carrierName: String,
+  pub carrierName: Option<String>,
   pub methodCode: String,
   pub trackingNumber: String,
   pub trackingURL: String,
+  pub otherCarrier: Option<String>,
+  pub unitOfMeasurement: Option<String>,
+  pub amount: Option<String>,
+}
+
+impl ShipParams {
+  fn to_value(&self) -> Value {
+    let timestamp: i64 =
+      self.shipDateTime.timestamp() * 1000 + self.shipDateTime.timestamp_subsec_millis() as i64;
+    json!({
+      "lineNumber": self.lineNumber,
+      "orderLineStatuses": {
+        "orderLineStatus": [
+          {
+            "status": "Shipped",
+            "statusQuantity": {
+              "unitOfMeasurement": self.unitOfMeasurement.clone().unwrap_or_else(|| "EACH".to_owned()),
+              "amount": self.amount.clone().unwrap_or_else(|| "1".to_owned()),
+            },
+            "trackingInfo": {
+              "shipDateTime": timestamp,
+              "carrierName": {
+                "otherCarrier": self.otherCarrier,
+                "carrier": self.carrierName,
+              },
+              "methodCode": self.methodCode,
+              "trackingNumber": self.trackingNumber,
+              "trackingURL": self.trackingURL
+            }
+          }
+        ]
+      }
+    })
+  }
 }
 
 pub type OrderList = ListResponse<Order>;
@@ -98,40 +133,23 @@ impl Client {
   pub fn ship_order_line(
     &self,
     purchase_order_id: &str,
-    params: &ShipParams,
+    line: &ShipParams,
   ) -> WalmartResult<Order> {
-    use serde_json::Value;
-    let timestamp: i64 =
-      params.shipDateTime.timestamp() * 1000 + params.shipDateTime.timestamp_subsec_millis() as i64;
+    self.ship_order(purchase_order_id, &[line.clone()])
+  }
+
+  pub fn ship_order(
+    &self,
+    purchase_order_id: &str,
+    lines: &[ShipParams],
+  ) -> WalmartResult<Order> {
+    let line_values: Vec<_> = lines.into_iter()
+      .map(ShipParams::to_value)
+      .collect();
     let body = json!({
       "orderShipment": {
         "orderLines": {
-          "orderLine": [
-            {
-              "lineNumber": params.lineNumber,
-              "orderLineStatuses": {
-                "orderLineStatus": [
-                  {
-                    "status": "Shipped",
-                    "statusQuantity": {
-                      "unitOfMeasurement": "EA",
-                      "amount": "1"
-                    },
-                    "trackingInfo": {
-                      "shipDateTime": timestamp,
-                      "carrierName": {
-                        "otherCarrier": Value::Null,
-                        "carrier": params.carrierName
-                      },
-                      "methodCode": params.methodCode,
-                      "trackingNumber": params.trackingNumber,
-                      "trackingURL": params.trackingURL
-                    }
-                  }
-                ]
-              }
-            }
-          ]
+          "orderLine": line_values,
         }
       }
     });
