@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use result::*;
-use serde_urlencoded;
 use serde_json::Value;
+use serde_urlencoded;
 
 mod types;
 
@@ -49,7 +49,7 @@ pub struct ShipParams {
 }
 
 impl ShipParams {
-  fn to_value(&self) -> Value {
+  pub fn to_value(&self) -> Value {
     let timestamp: i64 =
       self.shipDateTime.timestamp() * 1000 + self.shipDateTime.timestamp_subsec_millis() as i64;
     json!({
@@ -138,14 +138,8 @@ impl Client {
     self.ship_order(purchase_order_id, &[line.clone()])
   }
 
-  pub fn ship_order(
-    &self,
-    purchase_order_id: &str,
-    lines: &[ShipParams],
-  ) -> WalmartResult<Order> {
-    let line_values: Vec<_> = lines.into_iter()
-      .map(ShipParams::to_value)
-      .collect();
+  pub fn ship_order(&self, purchase_order_id: &str, lines: &[ShipParams]) -> WalmartResult<Order> {
+    let line_values: Vec<_> = lines.into_iter().map(ShipParams::to_value).collect();
     let body = json!({
       "orderShipment": {
         "orderLines": {
