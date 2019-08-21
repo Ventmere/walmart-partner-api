@@ -36,6 +36,9 @@ pub enum WalmartError {
 
   #[fail(display = "csv error: {}", _0)]
   Csv(::csv::Error),
+
+  #[fail(display = "invalid header value: {}", _0)]
+  InvalidHeaderValue(::reqwest::header::InvalidHeaderValue),
 }
 
 impl WalmartError {
@@ -76,6 +79,7 @@ impl_from!(Io(::std::io::Error));
 impl_from!(Zip(::zip::result::ZipError));
 impl_from!(XmlParse(::xmltree::ParseError));
 impl_from!(Csv(::csv::Error));
+impl_from!(InvalidHeaderValue(::reqwest::header::InvalidHeaderValue));
 
 #[derive(Debug)]
 pub struct ApiResponseError {
@@ -99,7 +103,7 @@ impl error::Error for ApiResponseError {
     "API response error"
   }
 
-  fn cause(&self) -> Option<&error::Error> {
+  fn cause(&self) -> Option<&dyn error::Error> {
     None
   }
 }

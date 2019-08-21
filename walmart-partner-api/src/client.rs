@@ -1,9 +1,9 @@
+use crate::result::*;
+use crate::sign::Signature;
 use chrono::Utc;
 use rand::{thread_rng, Rng};
 use reqwest;
 pub use reqwest::{Method, Request, RequestBuilder, Url};
-use result::*;
-use sign::Signature;
 
 const BASE_URL: &'static str = "https://marketplace.walmartapis.com";
 
@@ -80,7 +80,7 @@ impl Client {
   where
     P: ExtendUrlParams,
   {
-    use reqwest::header::Headers;
+    use reqwest::header::HeaderMap;
 
     let mut url = match self.marketplace {
       WalmartMarketplace::USA => self.base_url.join(path)?,
@@ -111,17 +111,17 @@ impl Client {
     // println!("request: timestamp = {}", timestamp);
     // println!("request: sign = {}", sign);
 
-    let mut req = self.http.request(method.clone(), url);
+    let req = self.http.request(method.clone(), url);
 
-    let mut headers = Headers::new();
+    let mut headers = HeaderMap::new();
     let rid: String = thread_rng().gen_ascii_chars().take(10).collect();
-    headers.set_raw("WM_SVC.NAME", "Walmart Marketplace");
-    headers.set_raw("WM_QOS.CORRELATION_ID", rid.as_ref() as &str);
-    headers.set_raw("WM_SEC.TIMESTAMP", timestamp.to_string().as_ref() as &str);
-    headers.set_raw("WM_SEC.AUTH_SIGNATURE", sign.as_ref() as &str);
-    headers.set_raw("WM_CONSUMER.CHANNEL.TYPE", &self.channel_type as &str);
-    headers.set_raw("WM_CONSUMER.ID", self.sign.consumer_id().as_ref() as &str);
-    req.headers(headers);
+    headers.insert("WM_SVC.NAME", "Walmart Marketplace".parse()?);
+    headers.insert("WM_QOS.CORRELATION_ID", rid.parse()?);
+    headers.insert("WM_SEC.TIMESTAMP", timestamp.to_string().parse()?);
+    headers.insert("WM_SEC.AUTH_SIGNATURE", sign.parse()?);
+    headers.insert("WM_CONSUMER.CHANNEL.TYPE", self.channel_type.parse()?);
+    headers.insert("WM_CONSUMER.ID", self.sign.consumer_id().parse()?);
+    let req = req.headers(headers);
     Ok(req)
   }
 
@@ -134,13 +134,11 @@ impl Client {
   where
     P: ExtendUrlParams,
   {
-    use reqwest::header::{qitem, Accept};
-    use reqwest::mime;
+    use reqwest::header::{HeaderValue, ACCEPT};
 
-    self.request(method, path, params).map(|mut req| {
-      req.header(Accept(vec![qitem(mime::APPLICATION_JSON)]));
-      req
-    })
+    self
+      .request(method, path, params)
+      .map(|req| req.header(ACCEPT, HeaderValue::from_static("application/json")))
   }
 
   pub fn request_xml<P>(
@@ -152,12 +150,11 @@ impl Client {
   where
     P: ExtendUrlParams,
   {
-    use reqwest::header::{qitem, Accept};
+    use reqwest::header::{HeaderValue, ACCEPT};
 
-    self.request(method, path, params).map(|mut req| {
-      req.header(Accept(vec![qitem("application/xml".parse().unwrap())]));
-      req
-    })
+    self
+      .request(method, path, params)
+      .map(|req| req.header(ACCEPT, HeaderValue::from_static("application/xml")))
   }
 
   pub(crate) fn get_marketplace(&self) -> WalmartMarketplace {

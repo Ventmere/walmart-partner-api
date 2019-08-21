@@ -1,13 +1,13 @@
+use crate::result::*;
 use chrono::{DateTime, Utc};
-use result::*;
 use serde_json::Value;
 use serde_urlencoded;
 
 mod types;
 
 pub use self::types::*;
-use client::{Client, Method};
-use response::{parse_list_elements_json, parse_object_json, ListResponse};
+use crate::client::{Client, Method};
+use crate::response::{parse_list_elements_json, parse_object_json, ListResponse};
 
 /// Query parameters for `get_all_released_orders`
 #[derive(Debug, Serialize)]
@@ -85,7 +85,7 @@ impl Client {
   pub fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> WalmartResult<OrderList> {
     let qs = serde_urlencoded::to_string(params)?;
     let mut res = self
-      .request_json(Method::Get, "/v3/orders/released", qs)?
+      .request_json(Method::GET, "/v3/orders/released", qs)?
       .send()?;
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
@@ -93,7 +93,7 @@ impl Client {
   pub fn get_all_orders(&self, params: &QueryParams) -> WalmartResult<OrderList> {
     let mut res = self
       .request_json(
-        Method::Get,
+        Method::GET,
         "/v3/orders",
         serde_urlencoded::to_string(params)?,
       )?
@@ -105,7 +105,7 @@ impl Client {
     use url::form_urlencoded;
     let mut res = self
       .request_json(
-        Method::Get,
+        Method::GET,
         "/v3/orders",
         form_urlencoded::parse((&next_cursor[1..]).as_bytes())
           .into_owned()
@@ -117,14 +117,14 @@ impl Client {
 
   pub fn get_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}", purchase_order_id);
-    let mut res = self.request_json(Method::Get, &path, ())?.send()?;
+    let mut res = self.request_json(Method::GET, &path, ())?.send()?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
   pub fn ack_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}/acknowledge", purchase_order_id);
     let mut res = self
-      .request_json(Method::Post, &path, ())?
+      .request_json(Method::POST, &path, ())?
       .json(&Vec::<i32>::new())
       .send()?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
@@ -150,7 +150,7 @@ impl Client {
     let path = format!("/v3/orders/{}/shipping", purchase_order_id);
     let mut res = self
       .request_json(
-        Method::Post,
+        Method::POST,
         &path,
         vec![("purchaseOrderId", purchase_order_id)],
       )?

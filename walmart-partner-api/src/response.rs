@@ -1,5 +1,5 @@
+use crate::result::ApiResponseError;
 use reqwest::{Response, StatusCode};
-use result::ApiResponseError;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::{self, Value};
@@ -113,7 +113,7 @@ where
     pub list: Inner,
   }
 
-  if status == StatusCode::NotFound {
+  if status == StatusCode::NOT_FOUND {
     return Ok(ListResponse {
       meta: None,
       elements: vec![],

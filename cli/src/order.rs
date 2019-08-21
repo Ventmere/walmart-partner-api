@@ -45,7 +45,6 @@ pub fn get(client: &Client, id: &str) {
 }
 
 pub fn ship(client: &Client, m: &ArgMatches) {
-  use chrono::Utc;
   let params = ShipParams {
     lineNumber: m
       .value_of("line_number")

@@ -9,7 +9,7 @@ use openssl::rsa::Rsa;
 use openssl::sign::Signer;
 use reqwest::Method;
 
-use result::*;
+use crate::result::*;
 
 pub struct Signature {
   consumer_id: String,

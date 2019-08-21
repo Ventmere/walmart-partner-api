@@ -1,7 +1,7 @@
 use super::ReportType;
+use crate::result::*;
 use bigdecimal::BigDecimal;
 use csv;
-use result::*;
 use std::io::prelude::*;
 use std::io::BufReader;
 use tempfile;

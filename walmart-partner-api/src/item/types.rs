@@ -1,7 +1,7 @@
 use super::GetAllItemsQueryParams;
-use client::WalmartMarketplace;
-use result::*;
-use xml::*;
+use crate::client::WalmartMarketplace;
+use crate::result::*;
+use crate::xml::*;
 use xmltree::Element;
 
 /// Response of `get_all_items`

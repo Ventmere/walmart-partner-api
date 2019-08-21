@@ -1,5 +1,5 @@
+use crate::result::*;
 use reqwest::Response;
-use result::*;
 use xmltree::Element;
 
 pub trait FromXmlElement: Sized {

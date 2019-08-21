@@ -1,11 +1,11 @@
-use response::JsonMaybe;
-use result::*;
+use crate::response::JsonMaybe;
+use crate::result::*;
 use std::io::Read;
 mod types;
 use serde_urlencoded;
 
 pub use self::types::*;
-use client::{Client, Method};
+use crate::client::{Client, Method};
 
 #[derive(Debug, Serialize, Default)]
 #[allow(non_snake_case)]
@@ -30,7 +30,7 @@ impl Client {
   ) -> WalmartResult<FeedStatuses> {
     let qs = serde_urlencoded::to_string(query)?;
     self
-      .request_json(Method::Get, "/v3/feeds", qs)?
+      .request_json(Method::GET, "/v3/feeds", qs)?
       .send()?
       .json_maybe::<FeedStatuses>()
       .map_err(Into::into)
@@ -43,7 +43,7 @@ impl Client {
   ) -> WalmartResult<PartnerFeedResponse> {
     let path = format!("/v3/feeds/{}", feed_id);
     self
-      .request_json(Method::Get, &path, serde_urlencoded::to_string(query)?)?
+      .request_json(Method::GET, &path, serde_urlencoded::to_string(query)?)?
       .send()?
       .json_maybe::<PartnerFeedResponse>()
       .map_err(Into::into)
@@ -55,7 +55,7 @@ impl Client {
     feed: R,
   ) -> WalmartResult<FeedAck> {
     use multipart::client::lazy::Multipart;
-    use reqwest::header::ContentType;
+    use reqwest::header::{HeaderValue, CONTENT_TYPE};
 
     let mut multipart = Multipart::new();
     multipart.add_stream::<_, _, &str>("file", feed, None, None);
@@ -66,9 +66,12 @@ impl Client {
       .unwrap();
 
     self
-      .request_json(Method::Post, "/v2/feeds", vec![("feedType", feed_type)])?
+      .request_json(Method::POST, "/v2/feeds", vec![("feedType", feed_type)])?
       .body(multipart_buffer)
-      .header(ContentType("multipart/form-data".parse().unwrap()))
+      .header(
+        CONTENT_TYPE,
+        HeaderValue::from_static("multipart/form-data"),
+      )
       .send()?
       .json_maybe::<FeedAck>()
       .map_err(Into::into)

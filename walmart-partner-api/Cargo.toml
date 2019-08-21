@@ -1,15 +1,16 @@
 [package]
 name = "walmart_partner_api"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Flux Xu <fluxxu@gmail.com>"]
 description = "Rust client for Walmart Partner APIs"
 repository = "https://github.com/Ventmere/walmart-partner-api"
 license = "MIT"
 exclude = ["target"]
+edition = "2018"
 
 [dependencies]
 url = "1.6.0"
-reqwest = "0.8.0"
+reqwest = "0.9.0"
 base64 = "0.6.0"
 chrono = { version = "0.4", features = ["serde"] }
 openssl = "0.9.15"

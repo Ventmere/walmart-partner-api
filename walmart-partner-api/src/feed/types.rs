@@ -1,6 +1,6 @@
+use crate::utils::deserialize_timestamp;
 use chrono::{DateTime, Utc};
 use serde_json::Value;
-use utils::deserialize_timestamp;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -19,9 +19,9 @@ pub struct FeedStatus {
   pub itemsFailed: i32,
   pub itemsProcessing: i32,
   pub feedStatus: String,
-  #[serde(deserialize_with="deserialize_timestamp")]
+  #[serde(deserialize_with = "deserialize_timestamp")]
   pub feedDate: DateTime<Utc>,
-  #[serde(deserialize_with="deserialize_timestamp")]  
+  #[serde(deserialize_with = "deserialize_timestamp")]
   pub modifiedDtm: DateTime<Utc>,
   pub fileName: Option<String>,
   pub itemDataErrorCount: i32,
@@ -71,7 +71,7 @@ pub struct PartnerFeedResponse {
   pub feedId: String,
   pub feedStatus: String,
   pub ingestionErrors: IngestionErrors,
-  pub itemsReceived: i32, 
+  pub itemsReceived: i32,
   pub itemsSucceeded: i32,
   pub itemsFailed: i32,
   pub itemsProcessing: i32,
@@ -87,7 +87,8 @@ mod tests {
 
   #[test]
   fn deserialize_partner_feed_response() {
-    from_str::<PartnerFeedResponse>(r##"{
+    from_str::<PartnerFeedResponse>(
+      r##"{
       "feedId": "117E39F0B7654B08A059457FB6E803FF@AQYBAAA",
       "feedStatus": "PROCESSED",
       "shipNode": null,
@@ -103,6 +104,8 @@ mod tests {
       "itemDetails": {
         "itemIngestionStatus": []
       }
-    }"##).unwrap();
+    }"##,
+    )
+    .unwrap();
   }
 }

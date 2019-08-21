@@ -1,7 +1,7 @@
-use result::*;
+use crate::result::*;
 mod types;
-use client::{Client, Method};
-use xml::Xml;
+use crate::client::{Client, Method};
+use crate::xml::Xml;
 
 pub use self::types::*;
 
@@ -32,7 +32,7 @@ impl Client {
     params: &GetAllItemsQueryParams,
   ) -> WalmartResult<(Xml<GetAllItems>, Option<GetAllItemsQueryParams>)> {
     let qs = serde_urlencoded::to_string(params)?;
-    let mut res = self.request_xml(Method::Get, "/v3/items", qs)?.send()?;
+    let mut res = self.request_xml(Method::GET, "/v3/items", qs)?.send()?;
 
     let xml = Xml::<GetAllItems>::from_res(&mut res)?;
     let next_params = xml.get_next_query_params(params, self.get_marketplace());
