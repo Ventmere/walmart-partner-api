@@ -5,20 +5,12 @@ extern crate csv;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
-extern crate multipart;
-extern crate openssl;
-extern crate rand;
-extern crate reqwest;
-extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
-extern crate serde_urlencoded;
-extern crate tempfile;
-extern crate url;
-extern crate xmltree;
-extern crate zip;
+#[macro_use]
+extern crate log;
 
 mod client;
 pub mod feed;
@@ -32,4 +24,4 @@ mod sign;
 mod utils;
 mod xml;
 
-pub use self::client::{Client, WalmartMarketplace};
+pub use self::client::{Client, WalmartCredential, WalmartMarketplace};

@@ -6,7 +6,7 @@ extern crate clap;
 extern crate serde_json;
 
 use std::env;
-use walmart_partner_api::{Client, WalmartMarketplace};
+use walmart_partner_api::{Client, WalmartCredential, WalmartMarketplace};
 
 mod feed;
 mod inventory;
@@ -15,6 +15,8 @@ mod order;
 mod report;
 
 fn main() {
+  env_logger::init();
+
   let matches = clap_app!(cli =>
     (version: "0.1")
     (about: "Walmart CLI")
@@ -39,6 +41,10 @@ fn main() {
       (@subcommand list =>
         (about: "Get orders created in last 24 hours")
         (@arg STATUS: "Sets the order status (default: Created)")        
+      )
+      (@subcommand list_status =>
+        (about: "Get orders with status")
+        (@arg STATUS: "Sets the order status")        
       )
       (@subcommand dump =>
         (about: "dump top 200 orders in last 365 days")
@@ -109,9 +115,18 @@ fn main() {
       "Canada" => WalmartMarketplace::Canada,
       _ => unreachable!(),
     },
-    &env::var("WALMART_CHANNEL_TYPE").unwrap(),
-    &env::var("WALMART_CONSUMER_ID").unwrap(),
-    &env::var("WALMART_PRIVATE_KEY").unwrap(),
+    if env::var("WALMART_CLIENT_ID").ok().is_some() {
+      WalmartCredential::TokenApi {
+        client_id: env::var("WALMART_CLIENT_ID").unwrap(),
+        client_secret: env::var("WALMART_CLIENT_SECRET").unwrap(),
+      }
+    } else {
+      WalmartCredential::Signature {
+        channel_type: env::var("WALMART_CHANNEL_TYPE").unwrap(),
+        consumer_id: env::var("WALMART_CONSUMER_ID").unwrap(),
+        private_key: env::var("WALMART_PRIVATE_KEY").unwrap(),
+      }
+    },
   )
   .unwrap();
 
@@ -135,6 +150,9 @@ fn main() {
     ("order", Some(matches)) => match matches.subcommand() {
       ("list", m) => {
         order::list(&client, m.and_then(|m| m.value_of("STATUS")));
+      }
+      ("list_status", Some(m)) => {
+        order::list_status(&client, m.value_of("STATUS").unwrap());
       }
       ("get", Some(m)) => {
         order::get(&client, m.value_of("ORDER_ID").unwrap());

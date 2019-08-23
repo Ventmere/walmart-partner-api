@@ -14,6 +14,15 @@ pub fn list(client: &Client, status: Option<&str>) {
   println!("{:#?}", res);
 }
 
+pub fn list_status(client: &Client, status: &str) {
+  let mut query: QueryParams = Default::default();
+  let start_date = (Utc::now() - Duration::days(30)).date().and_hms(0, 0, 0);
+  query.createdStartDate = Some(start_date);
+  query.status = Some(status.to_string());
+  let res = client.get_all_orders(&query).unwrap();
+  println!("{:#?}", res);
+}
+
 pub fn dump(client: &Client) {
   let mut query: QueryParams = Default::default();
   query.limit = Some(200);

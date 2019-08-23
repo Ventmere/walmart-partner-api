@@ -10,3 +10,4 @@ dotenv = "0.10.1"
 chrono = { version = "0.4", features = ["serde"] }
 walmart_partner_api = { path = "../walmart-partner-api" }
 serde_json = "1.0.2"
+env_logger = "0.6.2"
