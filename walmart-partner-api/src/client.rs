@@ -212,7 +212,7 @@ impl Client {
         if !force_renew {
           let lock = bearer_token.read().unwrap();
           if let Some(ref token) = lock.as_ref() {
-            if Instant::now() - token.expires_at > Duration::from_secs(120) {
+            if token.expires_at - Instant::now() > Duration::from_secs(120) {
               return Ok(token.access_token.clone());
             }
           }
@@ -245,6 +245,8 @@ impl Client {
             token.token_type
           )));
         }
+
+        debug!("token: {:#?}", token);
 
         let mut lock = bearer_token.write().unwrap();
         std::mem::replace(
