@@ -4,7 +4,7 @@ use chrono::Utc;
 use rand::{thread_rng, Rng};
 use reqwest;
 use reqwest::header::HeaderMap;
-pub use reqwest::{Method, Request, RequestBuilder, Url};
+pub use reqwest::{Method, Request, RequestBuilder, Response, StatusCode, Url};
 use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
@@ -183,6 +183,17 @@ impl Client {
     Ok(req)
   }
 
+  fn clear_access_token(&self) {
+    match self.auth_state {
+      AuthState::TokenApi {
+        ref bearer_token, ..
+      } => {
+        bearer_token.write().unwrap().take();
+      }
+      _ => {}
+    }
+  }
+
   fn get_access_token(&self, force_renew: bool) -> WalmartResult<String> {
     use std::collections::HashMap;
     #[derive(Debug, Deserialize)]
@@ -284,6 +295,18 @@ impl Client {
     self
       .request(method, path, params)
       .map(|req| req.header(ACCEPT, HeaderValue::from_static("application/xml")))
+  }
+
+  pub fn send(&self, req: RequestBuilder) -> WalmartResult<Response> {
+    match req.send() {
+      Ok(res) => {
+        if res.status() == StatusCode::UNAUTHORIZED {
+          self.clear_access_token();
+        }
+        Ok(res)
+      }
+      Err(err) => Err(err.into()),
+    }
   }
 
   pub(crate) fn get_marketplace(&self) -> WalmartMarketplace {

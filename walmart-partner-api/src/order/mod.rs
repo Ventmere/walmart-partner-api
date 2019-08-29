@@ -84,49 +84,46 @@ pub type OrderList = ListResponse<Order>;
 impl Client {
   pub fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> WalmartResult<OrderList> {
     let qs = serde_urlencoded::to_string(params)?;
-    let mut res = self
-      .request_json(Method::GET, "/v3/orders/released", qs)?
-      .send()?;
+    let mut res = self.send(self.request_json(Method::GET, "/v3/orders/released", qs)?)?;
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
   pub fn get_all_orders(&self, params: &QueryParams) -> WalmartResult<OrderList> {
-    let mut res = self
-      .request_json(
-        Method::GET,
-        "/v3/orders",
-        serde_urlencoded::to_string(params)?,
-      )?
-      .send()?;
+    let mut res = self.send(self.request_json(
+      Method::GET,
+      "/v3/orders",
+      serde_urlencoded::to_string(params)?,
+    )?)?;
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
   pub fn get_all_orders_by_next_cursor(&self, next_cursor: &str) -> WalmartResult<OrderList> {
     use url::form_urlencoded;
-    let mut res = self
-      .request_json(
+    let mut res = self.send(
+      self.request_json(
         Method::GET,
         "/v3/orders",
         form_urlencoded::parse((&next_cursor[1..]).as_bytes())
           .into_owned()
           .collect::<Vec<_>>(),
-      )?
-      .send()?;
+      )?,
+    )?;
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
   pub fn get_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}", purchase_order_id);
-    let mut res = self.request_json(Method::GET, &path, ())?.send()?;
+    let mut res = self.send(self.request_json(Method::GET, &path, ())?)?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
   pub fn ack_order(&self, purchase_order_id: &str) -> WalmartResult<Order> {
     let path = format!("/v3/orders/{}/acknowledge", purchase_order_id);
-    let mut res = self
-      .request_json(Method::POST, &path, ())?
-      .json(&Vec::<i32>::new())
-      .send()?;
+    let mut res = self.send(
+      self
+        .request_json(Method::POST, &path, ())?
+        .json(&Vec::<i32>::new()),
+    )?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 
@@ -148,14 +145,15 @@ impl Client {
       }
     });
     let path = format!("/v3/orders/{}/shipping", purchase_order_id);
-    let mut res = self
-      .request_json(
-        Method::POST,
-        &path,
-        vec![("purchaseOrderId", purchase_order_id)],
-      )?
-      .json(&body)
-      .send()?;
+    let mut res = self.send(
+      self
+        .request_json(
+          Method::POST,
+          &path,
+          vec![("purchaseOrderId", purchase_order_id)],
+        )?
+        .json(&body),
+    )?;
     parse_object_json(res.status(), &mut res, "order").map_err(Into::into)
   }
 }

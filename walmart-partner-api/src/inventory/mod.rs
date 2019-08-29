@@ -12,8 +12,7 @@ impl Client {
       WalmartMarketplace::Canada => "/v3/inventory",
     };
     self
-      .request_json(Method::GET, path, vec![("sku", sku)])?
-      .send()?
+      .send(self.request_json(Method::GET, path, vec![("sku", sku)])?)?
       .json_maybe::<Inventory>()
       .map_err(Into::into)
   }
@@ -24,9 +23,11 @@ impl Client {
       WalmartMarketplace::Canada => "/v3/inventory",
     };
     self
-      .request_json(Method::PUT, path, vec![("sku", &inventory.sku)])?
-      .json(inventory)
-      .send()?
+      .send(
+        self
+          .request_json(Method::PUT, path, vec![("sku", &inventory.sku)])?
+          .json(inventory),
+      )?
       .json_maybe::<Inventory>()
       .map_err(Into::into)
   }

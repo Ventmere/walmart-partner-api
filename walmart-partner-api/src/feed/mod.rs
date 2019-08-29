@@ -30,8 +30,7 @@ impl Client {
   ) -> WalmartResult<FeedStatuses> {
     let qs = serde_urlencoded::to_string(query)?;
     self
-      .request_json(Method::GET, "/v3/feeds", qs)?
-      .send()?
+      .send(self.request_json(Method::GET, "/v3/feeds", qs)?)?
       .json_maybe::<FeedStatuses>()
       .map_err(Into::into)
   }
@@ -43,8 +42,7 @@ impl Client {
   ) -> WalmartResult<PartnerFeedResponse> {
     let path = format!("/v3/feeds/{}", feed_id);
     self
-      .request_json(Method::GET, &path, serde_urlencoded::to_string(query)?)?
-      .send()?
+      .send(self.request_json(Method::GET, &path, serde_urlencoded::to_string(query)?)?)?
       .json_maybe::<PartnerFeedResponse>()
       .map_err(Into::into)
   }
@@ -64,15 +62,16 @@ impl Client {
     multipart_prepared
       .read_to_end(&mut multipart_buffer)
       .unwrap();
-
     self
-      .request_json(Method::POST, "/v2/feeds", vec![("feedType", feed_type)])?
-      .body(multipart_buffer)
-      .header(
-        CONTENT_TYPE,
-        HeaderValue::from_static("multipart/form-data"),
-      )
-      .send()?
+      .send(
+        self
+          .request_json(Method::POST, "/v2/feeds", vec![("feedType", feed_type)])?
+          .body(multipart_buffer)
+          .header(
+            CONTENT_TYPE,
+            HeaderValue::from_static("multipart/form-data"),
+          ),
+      )?
       .json_maybe::<FeedAck>()
       .map_err(Into::into)
   }

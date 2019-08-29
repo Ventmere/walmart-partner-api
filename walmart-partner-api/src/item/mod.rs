@@ -32,7 +32,7 @@ impl Client {
     params: &GetAllItemsQueryParams,
   ) -> WalmartResult<(Xml<GetAllItems>, Option<GetAllItemsQueryParams>)> {
     let qs = serde_urlencoded::to_string(params)?;
-    let mut res = self.request_xml(Method::GET, "/v3/items", qs)?.send()?;
+    let mut res = self.send(self.request_xml(Method::GET, "/v3/items", qs)?)?;
 
     let xml = Xml::<GetAllItems>::from_res(&mut res)?;
     let next_params = xml.get_next_query_params(params, self.get_marketplace());

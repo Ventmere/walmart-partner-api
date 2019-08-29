@@ -25,16 +25,13 @@ impl Client {
     let qs = serde_urlencoded::to_string(&GetReportQuery {
       type_: R::report_type(),
     })?;
-    let res = self
-      .request_json(Method::GET, "/v2/getReport", qs)?
-      .send()?;
+    let res = self.send(self.request_json(Method::GET, "/v2/getReport", qs)?)?;
     R::deserialize(res)
   }
   pub fn get_report_raw<W: Write>(&self, type_: &str, mut w: W) -> WalmartResult<u64> {
     let qs = serde_urlencoded::to_string(&GetReportQuery { type_ })?;
     let mut res = self
-      .request_json(Method::GET, "/v2/getReport", qs)?
-      .send()?
+      .send(self.request_json(Method::GET, "/v2/getReport", qs)?)?
       .error_for_status()?;
     res.copy_to(&mut w).map_err(Into::into)
   }
