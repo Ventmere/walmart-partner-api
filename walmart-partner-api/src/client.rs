@@ -312,7 +312,7 @@ impl Client {
     }
   }
 
-  pub(crate) fn get_marketplace(&self) -> WalmartMarketplace {
+  pub fn get_marketplace(&self) -> WalmartMarketplace {
     self.marketplace
   }
 }
