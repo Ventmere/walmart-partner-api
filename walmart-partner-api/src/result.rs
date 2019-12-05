@@ -39,6 +39,9 @@ pub enum WalmartError {
 
   #[fail(display = "invalid header value: {}", _0)]
   InvalidHeaderValue(::reqwest::header::InvalidHeaderValue),
+
+  #[fail(display = "unexpected xml: {}", _0)]
+  UnexpectedXml(String),
 }
 
 impl WalmartError {

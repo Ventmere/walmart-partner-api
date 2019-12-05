@@ -1,4 +1,6 @@
+use crate::result::*;
 use crate::utils::deserialize_timestamp;
+use crate::xml::{Element, FromXmlElement};
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 
@@ -6,6 +8,19 @@ use serde_json::Value;
 #[allow(non_snake_case)]
 pub struct FeedAck {
   pub feedId: String,
+}
+
+impl FromXmlElement for FeedAck {
+  fn from_xml_element(elem: Element) -> WalmartResult<Self> {
+    Ok(FeedAck {
+      feedId: elem
+        .get_child("feedId")
+        .ok_or_else(|| WalmartError::UnexpectedXml(format!("missing `feedId` element")))?
+        .text
+        .clone()
+        .ok_or_else(|| WalmartError::UnexpectedXml(format!("empty `feedId` element")))?,
+    })
+  }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

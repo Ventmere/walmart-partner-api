@@ -1,6 +1,6 @@
 use crate::result::*;
 use reqwest::Response;
-use xmltree::Element;
+pub use xmltree::Element;
 
 pub trait FromXmlElement: Sized {
   fn from_xml_element(elem: Element) -> WalmartResult<Self>;

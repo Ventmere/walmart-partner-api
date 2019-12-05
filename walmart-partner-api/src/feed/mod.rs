@@ -6,6 +6,7 @@ use serde_urlencoded;
 
 pub use self::types::*;
 use crate::client::{Client, Method};
+use crate::xml::Xml;
 
 #[derive(Debug, Serialize, Default)]
 #[allow(non_snake_case)]
@@ -47,32 +48,20 @@ impl Client {
       .map_err(Into::into)
   }
 
-  pub fn bulk_upload<R: Read + Send + 'static>(
+  pub fn bulk_upload_xml<R: Read + Send + 'static>(
     &self,
     feed_type: &str,
     feed: R,
   ) -> WalmartResult<FeedAck> {
-    use multipart::client::lazy::Multipart;
     use reqwest::header::{HeaderValue, CONTENT_TYPE};
-
-    let mut multipart = Multipart::new();
-    multipart.add_stream::<_, _, &str>("file", feed, None, None);
-    let mut multipart_prepared = multipart.prepare().unwrap();
-    let mut multipart_buffer: Vec<u8> = vec![];
-    multipart_prepared
-      .read_to_end(&mut multipart_buffer)
-      .unwrap();
-    self
-      .send(
-        self
-          .request_json(Method::POST, "/v2/feeds", vec![("feedType", feed_type)])?
-          .body(multipart_buffer)
-          .header(
-            CONTENT_TYPE,
-            HeaderValue::from_static("multipart/form-data"),
-          ),
-      )?
-      .json_maybe::<FeedAck>()
-      .map_err(Into::into)
+    use reqwest::Body;
+    let mut res = self.send(
+      self
+        .request_xml(Method::POST, "/v3/feeds", vec![("feedType", feed_type)])?
+        .body(Body::new(feed))
+        .header(CONTENT_TYPE, HeaderValue::from_static("application/xml")),
+    )?;
+    let xml = Xml::<FeedAck>::from_res(&mut res)?;
+    Ok(xml.into_inner())
   }
 }

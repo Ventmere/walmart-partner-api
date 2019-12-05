@@ -4,7 +4,7 @@
 
 use base64::encode;
 use openssl::hash::MessageDigest;
-use openssl::pkey::PKey;
+use openssl::pkey::{PKey, Private};
 use openssl::rsa::Rsa;
 use openssl::sign::Signer;
 use reqwest::Method;
@@ -13,7 +13,7 @@ use crate::result::*;
 
 pub struct Signature {
   consumer_id: String,
-  keypair: PKey,
+  keypair: PKey<Private>,
 }
 
 impl Signature {
