@@ -70,7 +70,7 @@ pub struct ItemDetails {
 pub struct PartnerFeedResponse {
   pub feedId: String,
   pub feedStatus: String,
-  pub ingestionErrors: IngestionErrors,
+  pub ingestionErrors: Option<IngestionErrors>,
   pub itemsReceived: i32,
   pub itemsSucceeded: i32,
   pub itemsFailed: i32,
