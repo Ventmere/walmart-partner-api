@@ -78,13 +78,13 @@ pub struct OrderLineTrackingInfo {
   pub carrierName: OrderLineTrackingInfoCarrier,
   pub methodCode: String,
   pub trackingNumber: String,
-  pub trackingURL: String,
+  pub trackingURL: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct OrderLineStatus {
-  pub status: String, 
+  pub status: String,
   pub statusQuantity: Quantity,
   // pub cancellationReason: Option<?>,
   pub trackingInfo: Option<OrderLineTrackingInfo>,
