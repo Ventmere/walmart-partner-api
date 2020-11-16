@@ -119,7 +119,7 @@ pub struct OrderLines {
 pub struct Order {
   pub purchaseOrderId: String,
   pub customerOrderId: String,
-  pub customerEmailId: String,
+  pub customerEmailId: Option<String>,
   pub orderDate: i64,
   pub shippingInfo: ShippingInformation,
   pub orderLines: OrderLines,

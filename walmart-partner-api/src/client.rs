@@ -250,13 +250,10 @@ impl Client {
         debug!("token: {:#?}", token);
 
         let mut lock = bearer_token.write().unwrap();
-        std::mem::replace(
-          &mut lock as &mut Option<_>,
-          Some(BearerToken {
-            access_token: token.access_token,
-            expires_at: Instant::now() + Duration::from_secs(token.expires_in),
-          }),
-        );
+        lock.replace(BearerToken {
+          access_token: token.access_token,
+          expires_at: Instant::now() + Duration::from_secs(token.expires_in),
+        });
 
         Ok(access_token)
       }
