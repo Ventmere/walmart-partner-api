@@ -15,8 +15,6 @@ mod order;
 mod report;
 
 fn main() {
-  env_logger::init();
-
   let matches = clap_app!(cli =>
     (version: "0.1")
     (about: "Walmart CLI")
@@ -41,6 +39,8 @@ fn main() {
       (@subcommand list =>
         (about: "Get orders created in last 24 hours")
         (@arg STATUS: "Sets the order status (default: Created)")        
+      )
+      (@subcommand list_released => 
       )
       (@subcommand list_status =>
         (about: "Get orders with status")
@@ -109,6 +109,8 @@ fn main() {
     }
   }
 
+  env_logger::init();
+
   let client = Client::new(
     match env::var("WALMART_MARKETPLACE").unwrap().as_ref() {
       "USA" => WalmartMarketplace::USA,
@@ -150,6 +152,9 @@ fn main() {
     ("order", Some(matches)) => match matches.subcommand() {
       ("list", m) => {
         order::list(&client, m.and_then(|m| m.value_of("STATUS")));
+      }
+      ("list_released", _) => {
+        order::list_released(&client);
       }
       ("list_status", Some(m)) => {
         order::list_status(&client, m.value_of("STATUS").unwrap());

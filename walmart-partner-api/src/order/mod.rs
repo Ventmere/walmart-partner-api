@@ -10,11 +10,11 @@ use crate::client::{Client, Method};
 use crate::response::{parse_list_elements_json, parse_object_json, ListResponse};
 
 /// Query parameters for `get_all_released_orders`
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Default)]
 #[allow(non_snake_case)]
 pub struct ReleasedQueryParams {
   pub limit: Option<i32>,
-  pub createdStartDate: DateTime<Utc>,
+  pub createdStartDate: Option<DateTime<Utc>>,
   pub nextCursor: Option<String>,
 }
 
@@ -32,6 +32,7 @@ pub struct QueryParams {
   pub toExpectedShipDate: Option<DateTime<Utc>>,
   pub limit: Option<i32>,
   pub nextCursor: Option<String>,
+  pub shipNodeType: Option<String>,
 }
 
 #[derive(Debug, Clone)]
