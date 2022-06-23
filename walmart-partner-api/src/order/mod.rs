@@ -10,6 +10,7 @@ use crate::client::{Client, Method};
 use crate::response::{parse_list_elements_json, parse_object_json, ListResponse};
 
 /// Query parameters for `get_all_released_orders`
+
 #[derive(Debug, Serialize, Default)]
 #[allow(non_snake_case)]
 pub struct ReleasedQueryParams {
@@ -47,6 +48,7 @@ pub struct ShipParams {
   pub otherCarrier: Option<String>,
   pub unitOfMeasurement: Option<String>,
   pub amount: Option<String>,
+  pub shipFromCountry: String,
 }
 
 impl ShipParams {
@@ -56,6 +58,7 @@ impl ShipParams {
     json!({
       "lineNumber": self.lineNumber,
       "orderLineStatuses": {
+        "shipFromCountry": self.shipFromCountry,
         "orderLineStatus": [
           {
             "status": "Shipped",

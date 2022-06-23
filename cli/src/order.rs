@@ -82,6 +82,7 @@ pub fn ship(client: &Client, m: &ArgMatches) {
     otherCarrier: m.value_of("other_carrier").map(ToString::to_string),
     unitOfMeasurement: m.value_of("unit_of_measurement").map(ToString::to_string),
     amount: m.value_of("amount").map(ToString::to_string),
+    shipFromCountry: m.value_of("shipFromCountry").map(ToString::to_string).unwrap(),
   };
   let res = client
     .ship_order_line(m.value_of("ORDER_ID").unwrap(), &params)
