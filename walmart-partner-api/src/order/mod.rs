@@ -57,8 +57,8 @@ impl ShipParams {
       self.shipDateTime.timestamp() * 1000 + self.shipDateTime.timestamp_subsec_millis() as i64;
     json!({
       "lineNumber": self.lineNumber,
+      "shipFromCountry": self.shipFromCountry,
       "orderLineStatuses": {
-        "shipFromCountry": self.shipFromCountry,
         "orderLineStatus": [
           {
             "status": "Shipped",
