@@ -2,9 +2,6 @@ extern crate base64;
 extern crate bigdecimal;
 extern crate chrono;
 extern crate csv;
-extern crate failure;
-#[macro_use]
-extern crate failure_derive;
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]

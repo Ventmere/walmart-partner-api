@@ -1,47 +1,54 @@
 use reqwest::StatusCode;
 use std::error;
 use std::fmt;
+use thiserror::Error;
 
-#[derive(Fail, Debug)]
+#[derive(Error, Debug)]
 pub enum WalmartError {
-  #[fail(display = "{}", _0)]
+  #[error("{0}")]
   Msg(String),
 
-  #[fail(display = "api response error: {}", _0)]
-  Api(ApiResponseError),
+  #[error("api response error: {0}")]
+  Api(#[from] ApiResponseError),
 
-  #[fail(display = "http error: {}", _0)]
-  Reqwest(::reqwest::Error),
+  #[error("http error: {0}")]
+  Reqwest(#[from] reqwest::Error),
 
-  #[fail(display = "url error: {}", _0)]
-  UrlError(::reqwest::UrlError),
+  #[error("url error: {0}")]
+  UrlError(#[from] reqwest::UrlError),
 
-  #[fail(display = "base64 error: {}", _0)]
-  Base64(::base64::DecodeError),
+  #[error("base64 error: {0}")]
+  Base64(#[from] base64::DecodeError),
 
-  #[fail(display = "openssl error: {}", _0)]
-  OpenSSL(::openssl::error::ErrorStack),
+  #[error("openssl error: {0}")]
+  OpenSSL(#[from] openssl::error::ErrorStack),
 
-  #[fail(display = "url query serialize error: {}", _0)]
-  UrlEncoded(::serde_urlencoded::ser::Error),
+  #[error("url query serialize error: {0}")]
+  UrlEncoded(#[from] serde_urlencoded::ser::Error),
 
-  #[fail(display = "io error: {}", _0)]
-  Io(::std::io::Error),
+  #[error("io error: {0}")]
+  Io(#[from] std::io::Error),
 
-  #[fail(display = "zip error: {}", _0)]
-  Zip(::zip::result::ZipError),
+  #[error("zip error: {0}")]
+  Zip(#[from] zip::result::ZipError),
 
-  #[fail(display = "xml parse error: {}", _0)]
-  XmlParse(::xmltree::ParseError),
+  #[error("xml parse error: {0}")]
+  XmlParse(#[from] xmltree::ParseError),
 
-  #[fail(display = "csv error: {}", _0)]
-  Csv(::csv::Error),
+  #[error("csv error: {0}")]
+  Csv(#[from] csv::Error),
 
-  #[fail(display = "invalid header value: {}", _0)]
-  InvalidHeaderValue(::reqwest::header::InvalidHeaderValue),
+  #[error("invalid header value: {0}")]
+  InvalidHeaderValue(#[from] reqwest::header::InvalidHeaderValue),
 
-  #[fail(display = "unexpected xml: {}", _0)]
+  #[error("unexpected xml: {0}")]
   UnexpectedXml(String),
+}
+
+impl From<String> for WalmartError {
+  fn from(v: String) -> Self {
+    Self::Msg(v)
+  }
 }
 
 impl WalmartError {
@@ -60,29 +67,6 @@ impl WalmartError {
     }
   }
 }
-
-macro_rules! impl_from {
-  ($v:ident($t:ty)) => {
-    impl From<$t> for WalmartError {
-      fn from(e: $t) -> Self {
-        WalmartError::$v(e)
-      }
-    }
-  };
-}
-
-impl_from!(Msg(String));
-impl_from!(Api(ApiResponseError));
-impl_from!(Reqwest(::reqwest::Error));
-impl_from!(UrlError(::reqwest::UrlError));
-impl_from!(Base64(::base64::DecodeError));
-impl_from!(OpenSSL(::openssl::error::ErrorStack));
-impl_from!(UrlEncoded(::serde_urlencoded::ser::Error));
-impl_from!(Io(::std::io::Error));
-impl_from!(Zip(::zip::result::ZipError));
-impl_from!(XmlParse(::xmltree::ParseError));
-impl_from!(Csv(::csv::Error));
-impl_from!(InvalidHeaderValue(::reqwest::header::InvalidHeaderValue));
 
 #[derive(Debug)]
 pub struct ApiResponseError {

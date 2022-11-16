@@ -6,7 +6,7 @@ description = "Rust client for Walmart Partner APIs"
 repository = "https://github.com/Ventmere/walmart-partner-api"
 license = "MIT"
 exclude = ["target"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 url = "1.6.0"
@@ -24,6 +24,5 @@ csv = "1.0.0-beta.5"
 tempfile = "2"
 bigdecimal = ">=0.0.10,<0.2.0"
 xmltree = "0.8.0"
-failure = "0.1.2"
-failure_derive = "0.1.2"
 log = "0.4"
+thiserror = "1.0.37"
