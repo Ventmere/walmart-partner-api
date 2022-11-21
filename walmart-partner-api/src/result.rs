@@ -14,8 +14,8 @@ pub enum WalmartError {
   #[error("http error: {0}")]
   Reqwest(#[from] reqwest::Error),
 
-  #[error("url error: {0}")]
-  UrlError(#[from] reqwest::UrlError),
+  #[error("url parse error: {0}")]
+  UrlParse(#[from] url::ParseError),
 
   #[error("base64 error: {0}")]
   Base64(#[from] base64::DecodeError),
@@ -25,6 +25,9 @@ pub enum WalmartError {
 
   #[error("url query serialize error: {0}")]
   UrlEncoded(#[from] serde_urlencoded::ser::Error),
+
+  #[error("xml serialization error: {0}")]
+  XmlSer(#[from] quick_xml::de::DeError),
 
   #[error("io error: {0}")]
   Io(#[from] std::io::Error),

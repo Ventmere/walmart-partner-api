@@ -1,7 +1,7 @@
 use crate::result::ApiResponseError;
 use reqwest::{Response, StatusCode};
 use serde::de::DeserializeOwned;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 use std::io::Read;
 
@@ -53,40 +53,43 @@ pub trait JsonMaybe {
 
 impl JsonMaybe for Response {
   fn json_maybe<T: DeserializeOwned>(&mut self) -> Result<T> {
-    let status = self.status();
+    todo!()
+    // let status = self.status();
+    //
+    // if !status.is_success() {
+    //   return Err(ApiResponseError {
+    //     message: format!("status not ok: {}", status),
+    //     status: status.clone(),
+    //     body: body,
+    //   });
+    // }
+    //
+    // match self.json::<T>() {
+    //   Ok(v) => {
+    //     return Ok(v);
+    //   }
+    //   Err(err) => {
+    //     return Err(ApiResponseError {
+    //       message: format!("deserialize body: {}", err),
+    //       status: status.clone(),
+    //       body: body,
+    //     });
+    //   }
+    // }
+  }
+}
 
-    let mut body = String::new();
-    match self.read_to_string(&mut body) {
-      Err(err) => {
-        return Err(ApiResponseError {
-          status: status.clone(),
-          message: format!("read response: {}", err),
-          body: "".to_owned(),
-        });
-      }
-      _ => {}
-    }
+pub trait ResponseExt {
+  async fn json_res<T: DeserializeOwned>(&mut self) -> Result<T>;
+  async fn xml_res<T: DeserializeOwned>(&mut self) -> Result<T>;
+}
 
-    if !status.is_success() {
-      return Err(ApiResponseError {
-        message: format!("status not ok: {}", status),
-        status: status.clone(),
-        body: body,
-      });
-    }
-
-    match serde_json::from_str::<T>(&body) {
-      Ok(v) => {
-        return Ok(v);
-      }
-      Err(err) => {
-        return Err(ApiResponseError {
-          message: format!("deserialize body: {}", err),
-          status: status.clone(),
-          body: body,
-        });
-      }
-    }
+impl ResponseExt for Response {
+  async fn json_res<T: DeserializeOwned>(&mut self) -> Result<T> {
+    todo!()
+  }
+  async fn xml_res<T: DeserializeOwned>(&mut self) -> Result<T> {
+    todo!()
   }
 }
 
@@ -100,76 +103,77 @@ where
   T: Serialize + DeserializeOwned,
   R: Read,
 {
-  use std::collections::BTreeMap;
-
-  #[derive(Debug, Deserialize)]
-  pub struct Inner {
-    pub meta: ListMeta,
-    pub elements: BTreeMap<String, Value>,
-  }
-
-  #[derive(Debug, Deserialize)]
-  pub struct Response {
-    pub list: Inner,
-  }
-
-  if status == StatusCode::NOT_FOUND {
-    return Ok(ListResponse {
-      meta: None,
-      elements: vec![],
-    });
-  }
-
-  let mut body = String::new();
-  match reader.read_to_string(&mut body) {
-    _ => {}
-  }
-
-  if !status.is_success() {
-    return Err(ApiResponseError {
-      message: status.to_string(),
-      status: status.clone(),
-      body: body,
-    });
-  }
-
-  match serde_json::from_str::<Response>(&body) {
-    Ok(mut res) => {
-      let value = match res.list.elements.remove(key) {
-        Some(value) => value,
-        None => {
-          return Err(ApiResponseError {
-            message: format!("key '{}' was not found in resposne", key),
-            status: status.clone(),
-            body: body,
-          });
-        }
-      };
-
-      match serde_json::from_value::<Vec<T>>(value) {
-        Ok(elements) => {
-          return Ok(ListResponse {
-            meta: res.list.meta.into(),
-            elements: elements,
-          });
-        }
-        Err(err) => {
-          return Err(ApiResponseError {
-            message: format!("deserialize json response elements: {}", err.to_string()),
-            status: status.clone(),
-            body: body,
-          });
-        }
-      }
-    }
-    Err(err) => {
-      return Err(ApiResponseError {
-        message: format!("deserialize json response: {}", err.to_string()),
-        status: status.clone(),
-        body: body,
-      });
-    }
-  }
+  todo!()
+  // use std::collections::BTreeMap;
+  //
+  // #[derive(Debug, Deserialize)]
+  // pub struct Inner {
+  //   pub meta: ListMeta,
+  //   pub elements: BTreeMap<String, Value>,
+  // }
+  //
+  // #[derive(Debug, Deserialize)]
+  // pub struct Response {
+  //   pub list: Inner,
+  // }
+  //
+  // if status == StatusCode::NOT_FOUND {
+  //   return Ok(ListResponse {
+  //     meta: None,
+  //     elements: vec![],
+  //   });
+  // }
+  //
+  // let mut body = String::new();
+  // match reader.read_to_string(&mut body) {
+  //   _ => {}
+  // }
+  //
+  // if !status.is_success() {
+  //   return Err(ApiResponseError {
+  //     message: status.to_string(),
+  //     status: status.clone(),
+  //     body: body,
+  //   });
+  // }
+  //
+  // match serde_json::from_str::<Response>(&body) {
+  //   Ok(mut res) => {
+  //     let value = match res.list.elements.remove(key) {
+  //       Some(value) => value,
+  //       None => {
+  //         return Err(ApiResponseError {
+  //           message: format!("key '{}' was not found in resposne", key),
+  //           status: status.clone(),
+  //           body: body,
+  //         });
+  //       }
+  //     };
+  //
+  //     match serde_json::from_value::<Vec<T>>(value) {
+  //       Ok(elements) => {
+  //         return Ok(ListResponse {
+  //           meta: res.list.meta.into(),
+  //           elements: elements,
+  //         });
+  //       }
+  //       Err(err) => {
+  //         return Err(ApiResponseError {
+  //           message: format!("deserialize json response elements: {}", err.to_string()),
+  //           status: status.clone(),
+  //           body: body,
+  //         });
+  //       }
+  //     }
+  //   }
+  //   Err(err) => {
+  //     return Err(ApiResponseError {
+  //       message: format!("deserialize json response: {}", err.to_string()),
+  //       status: status.clone(),
+  //       body: body,
+  //     });
+  //   }
+  // }
 }
 
 /// Get single object from a JSON API response

@@ -1,10 +1,12 @@
 use crate::result::*;
 use crate::sign::Signature;
 use chrono::Utc;
-use rand::{thread_rng, Rng};
 use reqwest;
 use reqwest::header::HeaderMap;
 pub use reqwest::{Method, Request, RequestBuilder, Response, StatusCode, Url};
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
@@ -80,6 +82,12 @@ pub struct Client {
   http: reqwest::Client,
 }
 
+#[derive(Debug, Default)]
+pub struct ReqOptions {
+  pub correlation_id: Option<String>,
+  pub headers: Option<HeaderMap>,
+}
+
 impl Client {
   pub fn new(
     marketplace: WalmartMarketplace,
@@ -125,26 +133,11 @@ impl Client {
   {
     let mut url = match self.marketplace {
       WalmartMarketplace::USA => self.base_url.join(path)?,
-      WalmartMarketplace::Canada => {
-        // add `ca` to url
-        let path = path
-          .split('/')
-          .enumerate()
-          .map(|(i, seg)| {
-            if i == 1 {
-              format!("{}/ca", seg)
-            } else {
-              seg.to_string()
-            }
-          })
-          .collect::<Vec<String>>()
-          .join("/");
-        self.base_url.join(&path)?
-      }
+      WalmartMarketplace::Canada => self.base_url.join(&path)?,
     };
     params.extend_url_params(&mut url);
 
-    debug!("request: method = {}, url = {}", method, url);
+    tracing::debug!("request: method = {}, url = {}", method, url);
 
     let timestamp = Utc::now();
     let timestamp = timestamp.timestamp() * 1000 + timestamp.timestamp_subsec_millis() as i64;
@@ -152,33 +145,11 @@ impl Client {
     let mut req = self.http.request(method.clone(), url.as_str());
 
     let mut headers = HeaderMap::new();
-    let rid: String = thread_rng().gen_ascii_chars().take(10).collect();
+    let rid: String = uuid::Uuid::new_v4().hyphenated().to_string();
     headers.insert("WM_SVC.NAME", "Walmart Marketplace".parse()?);
     headers.insert("WM_QOS.CORRELATION_ID", rid.parse()?);
     headers.insert("WM_SEC.TIMESTAMP", timestamp.to_string().parse()?);
 
-    match self.auth_state {
-      AuthState::Signature {
-        ref channel_type,
-        ref signature,
-      } => {
-        let sign = signature.sign(url.as_str(), method.clone(), timestamp)?;
-        debug!("auth: Signature: sign = {}", sign);
-        headers.insert("WM_CONSUMER.CHANNEL.TYPE", channel_type.parse()?);
-        headers.insert("WM_CONSUMER.ID", signature.consumer_id().parse()?);
-        headers.insert("WM_SEC.AUTH_SIGNATURE", sign.parse()?);
-      }
-      AuthState::TokenApi {
-        ref client_id,
-        ref client_secret,
-        ..
-      } => {
-        let access_token = self.get_access_token(false)?;
-        debug!("auth: TokenApi: access_token = {}", access_token);
-        headers.insert("WM_SEC.ACCESS_TOKEN", access_token.parse()?);
-        req = req.basic_auth(client_id, Some(client_secret));
-      }
-    }
     let req = req.headers(headers);
     Ok(req)
   }
@@ -194,8 +165,7 @@ impl Client {
     }
   }
 
-  fn get_access_token(&self, force_renew: bool) -> WalmartResult<String> {
-    use std::collections::HashMap;
+  async fn refresh_access_token(&self, force_renew: bool) -> WalmartResult<String> {
     #[derive(Debug, Deserialize)]
     struct WalmartBearerToken {
       access_token: String,
@@ -224,7 +194,7 @@ impl Client {
         form.insert("grant_type", "client_credentials");
 
         let mut headers = HeaderMap::new();
-        let rid: String = thread_rng().gen_ascii_chars().take(10).collect();
+        let rid: String = uuid::Uuid::new_v4().hyphenated().to_string();
         headers.insert("WM_SVC.NAME", "Walmart Marketplace".parse()?);
         headers.insert("WM_QOS.CORRELATION_ID", rid.parse()?);
         headers.insert("Accept", "application/json".parse()?);
@@ -235,9 +205,11 @@ impl Client {
           .headers(headers)
           .form(&form)
           .basic_auth(client_id, Some(client_secret))
-          .send()?;
+          .send()
+          .await?;
 
-        let token: WalmartBearerToken = res.json()?;
+        // TODO: Convert to correct json handler
+        let token = res.json::<WalmartBearerToken>().await?;
         let access_token = token.access_token.clone();
 
         if token.token_type != "Bearer" {
@@ -247,7 +219,7 @@ impl Client {
           )));
         }
 
-        debug!("token: {:#?}", token);
+        tracing::debug!("token: {:#?}", token);
 
         let mut lock = bearer_token.write().unwrap();
         lock.replace(BearerToken {
@@ -265,12 +237,7 @@ impl Client {
     }
   }
 
-  pub fn request_json<P>(
-    &self,
-    method: Method,
-    path: &str,
-    params: P,
-  ) -> WalmartResult<RequestBuilder>
+  pub fn req_json<P>(&self, method: Method, path: &str, params: P) -> WalmartResult<RequestBuilder>
   where
     P: ExtendUrlParams,
   {
@@ -281,11 +248,12 @@ impl Client {
       .map(|req| req.header(ACCEPT, HeaderValue::from_static("application/json")))
   }
 
-  pub fn request_xml<P>(
+  pub fn req_xml<P>(
     &self,
     method: Method,
     path: &str,
     params: P,
+    options: Option<ReqOptions>,
   ) -> WalmartResult<RequestBuilder>
   where
     P: ExtendUrlParams,
@@ -297,8 +265,34 @@ impl Client {
       .map(|req| req.header(ACCEPT, HeaderValue::from_static("application/xml")))
   }
 
-  pub fn send(&self, req: RequestBuilder) -> WalmartResult<Response> {
-    match req.send() {
+  pub async fn send(&self, mut req: RequestBuilder) -> WalmartResult<WalmartRes> {
+    // TODO: refactor
+    let mut headers = HeaderMap::new();
+    // let timestamp = Utc::now();
+    // let timestamp = timestamp.timestamp() * 1000 + timestamp.timestamp_subsec_millis() as i64;
+    // match self.auth_state {
+    //   AuthState::Signature {
+    //     ref channel_type,
+    //     ref signature,
+    //   } => {
+    //     let sign = signature.sign(url.as_str(), method.clone(), timestamp)?;
+    //     tracing::debug!("auth: Signature: sign = {}", sign);
+    //     headers.insert("WM_CONSUMER.CHANNEL.TYPE", channel_type.parse()?);
+    //     headers.insert("WM_CONSUMER.ID", signature.consumer_id().parse()?);
+    //     headers.insert("WM_SEC.AUTH_SIGNATURE", sign.parse()?);
+    //   }
+    //   AuthState::TokenApi {
+    //     ref client_id,
+    //     ref client_secret,
+    //     ..
+    //   } => {
+    //     let access_token = self.refresh_access_token(false).await?;
+    //     tracing::debug!("auth: TokenApi: access_token = {}", access_token);
+    //     headers.insert("WM_SEC.ACCESS_TOKEN", access_token.parse()?);
+    //     req = req.basic_auth(client_id, Some(client_secret));
+    //   }
+    // }
+    match req.send().await {
       Ok(res) => {
         if res.status() == StatusCode::UNAUTHORIZED {
           self.clear_access_token();
@@ -311,6 +305,48 @@ impl Client {
 
   pub fn get_marketplace(&self) -> WalmartMarketplace {
     self.marketplace
+  }
+}
+
+pub struct WalmartRes(Response);
+
+impl WalmartRes {
+  pub async fn json<T: DeserializeOwned>(self) -> WalmartResult<T> {
+    todo!()
+  }
+
+  pub async fn xml<T: DeserializeOwned>(self) -> WalmartResult<T> {
+    todo!()
+  }
+}
+
+pub struct WalmartReq(RequestBuilder);
+
+impl WalmartReq() {
+  pub async fn new() -> WalmartRes {
+    todo!()
+  }
+
+  pub async fn xml<T: Serialize>(self) -> WalmartResult<Self> {
+    todo!()
+  }
+
+  pub async fn json<T: Serialize>(self) -> WalmartResult<Self> {
+    todo!()
+  }
+}
+
+pub trait RequestExt {
+  fn xml_body<T: Serialize>(self, xml: &T) -> WalmartResult<RequestBuilder>;
+}
+
+impl RequestExt for RequestBuilder {
+  fn xml_body<T: Serialize>(self, xml: &T) -> WalmartResult<Self> {
+    Ok(
+      self
+        .body(quick_xml::se::to_string(xml)?)
+        .header(reqwest::header::CONTENT_TYPE, "application/xml"),
+    )
   }
 }
 

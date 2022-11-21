@@ -2,6 +2,7 @@ use super::GetAllItemsQueryParams;
 use crate::client::WalmartMarketplace;
 use crate::result::*;
 use crate::xml::*;
+use serde::{Deserialize, Serialize};
 use xmltree::Element;
 
 /// Response of `get_all_items`
@@ -74,44 +75,44 @@ pub struct Item {
   pub publishedStatus: String,
 }
 
-impl FromXmlElement for GetAllItems {
-  fn from_xml_element(elem: Element) -> WalmartResult<Self> {
-    let items = elem
-      .children
-      .iter()
-      .filter_map(|c| {
-        if c.name == "ItemResponse" {
-          Some(Item {
-            mart: c.get_child_text_or_default("mart"),
-            sku: c.get_child_text_or_default("sku"),
-            wpid: c.get_child_text_or_default("wpid"),
-            upc: c.get_child_text_or_default("upc"),
-            gtin: c.get_child_text_or_default("gtin"),
-            productName: c.get_child_text_or_default("productName"),
-            shelf: c.get_child_text_or_default("shelf"),
-            productType: c.get_child_text_or_default("productType"),
-            price: c
-              .get_child("price")
-              .map(|c| Price {
-                currency: c.get_child_text_or_default("currency"),
-                amount: c.get_child_text_or_default("amount"),
-              })
-              .unwrap_or_default(),
-            publishedStatus: c.get_child_text_or_default("publishedStatus"),
-          })
-        } else {
-          None
-        }
-      })
-      .collect();
-    Ok(GetAllItems {
-      items,
-      totalItems: elem
-        .get_child_text_or_default("totalItems")
-        .parse()
-        .ok()
-        .unwrap_or_default(),
-      nextCursor: elem.get_child_text("nextCursor"),
-    })
-  }
-}
+// impl FromXmlElement for GetAllItems {
+//   fn from_xml_element(elem: Element) -> WalmartResult<Self> {
+//     let items = elem
+//       .children
+//       .iter()
+//       .filter_map(|c| {
+//         if c.name == "ItemResponse" {
+//           Some(Item {
+//             mart: c.get_child_text_or_default("mart"),
+//             sku: c.get_child_text_or_default("sku"),
+//             wpid: c.get_child_text_or_default("wpid"),
+//             upc: c.get_child_text_or_default("upc"),
+//             gtin: c.get_child_text_or_default("gtin"),
+//             productName: c.get_child_text_or_default("productName"),
+//             shelf: c.get_child_text_or_default("shelf"),
+//             productType: c.get_child_text_or_default("productType"),
+//             price: c
+//               .get_child("price")
+//               .map(|c| Price {
+//                 currency: c.get_child_text_or_default("currency"),
+//                 amount: c.get_child_text_or_default("amount"),
+//               })
+//               .unwrap_or_default(),
+//             publishedStatus: c.get_child_text_or_default("publishedStatus"),
+//           })
+//         } else {
+//           None
+//         }
+//       })
+//       .collect();
+//     Ok(GetAllItems {
+//       items,
+//       totalItems: elem
+//         .get_child_text_or_default("totalItems")
+//         .parse()
+//         .ok()
+//         .unwrap_or_default(),
+//       nextCursor: elem.get_child_text("nextCursor"),
+//     })
+//   }
+// }

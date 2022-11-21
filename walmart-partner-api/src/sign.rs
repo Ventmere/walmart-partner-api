@@ -1,7 +1,5 @@
-//! Implement Walmart's authentication signature
-//!
-//! [Walmart Documentation](https://developer.walmart.com/#/apicenter/contentProvider#authentication)
-
+/// Implement Walmart's authentication signature
+///
 use base64::encode;
 use openssl::hash::MessageDigest;
 use openssl::pkey::{PKey, Private};
@@ -17,7 +15,7 @@ pub struct Signature {
 }
 
 impl Signature {
-  /// Cosntruct a new `Signature`
+  /// Construct a new `Signature`
   pub fn new(consumer_id: &str, private_key: &str) -> WalmartResult<Signature> {
     let pem_key = format!(
       "-----BEGIN PRIVATE KEY-----\n{}\n-----END PRIVATE KEY-----",

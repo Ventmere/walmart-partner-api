@@ -24,24 +24,25 @@ where
   T: FromXmlElement,
 {
   pub fn from_res(res: &mut Response) -> WalmartResult<Self> {
-    use std::io::Cursor;
-
-    let status = res.status();
-    let text = res.text().map_err(|err| ApiResponseError {
-      message: format!("get response text: {}", err.to_string()),
-      status: status.clone(),
-      body: "".to_string(),
-    })?;
-
-    let elem = Element::parse(Cursor::new(text.as_bytes())).map_err(|err| ApiResponseError {
-      message: format!("parse response xml: {}", err.to_string()),
-      status: status.clone(),
-      body: text.clone(),
-    })?;
-
-    let inner = T::from_xml_element(elem)?;
-
-    Ok(Xml { inner, text })
+    todo!()
+    // use std::io::Cursor;
+    //
+    // let status = res.status();
+    // let text = res.text().map_err(|err| ApiResponseError {
+    //   message: format!("get response text: {}", err.to_string()),
+    //   status: status.clone(),
+    //   body: "".to_string(),
+    // })?;
+    //
+    // let elem = Element::parse(Cursor::new(text.as_bytes())).map_err(|err| ApiResponseError {
+    //   message: format!("parse response xml: {}", err.to_string()),
+    //   status: status.clone(),
+    //   body: text.clone(),
+    // })?;
+    //
+    // let inner = T::from_xml_element(elem)?;
+    //
+    // Ok(Xml { inner, text })
   }
 
   pub fn text(&self) -> &str {

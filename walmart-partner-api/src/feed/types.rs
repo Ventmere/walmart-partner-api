@@ -2,7 +2,16 @@ use crate::result::*;
 use crate::utils::deserialize_timestamp;
 use crate::xml::{Element, FromXmlElement};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+#[derive(Debug, Serialize, Default)]
+#[allow(non_snake_case)]
+pub struct GetAllFeedStatusesQuery<'a> {
+  pub feedId: Option<&'a str>,
+  pub limit: Option<i32>,
+  pub offset: Option<i32>,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -34,9 +43,7 @@ pub struct FeedStatus {
   pub itemsFailed: i32,
   pub itemsProcessing: i32,
   pub feedStatus: String,
-  #[serde(deserialize_with = "deserialize_timestamp")]
   pub feedDate: DateTime<Utc>,
-  #[serde(deserialize_with = "deserialize_timestamp")]
   pub modifiedDtm: DateTime<Utc>,
   pub fileName: Option<String>,
   pub itemDataErrorCount: i32,
@@ -65,13 +72,21 @@ pub struct ItemIngestionStatus {
   pub sku: String,
   pub wpid: String,
   pub ingestionStatus: String,
-  pub ingestionErrors: IngestionErrors,
+  pub ingestionErrors: Option<IngestionErrors>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct IngestionErrors {
-  pub ingestionError: Value,
+  pub ingestionError: Vec<IngestionError>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct IngestionError {
+  pub type_: String,
+  pub code: String,
+  pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
