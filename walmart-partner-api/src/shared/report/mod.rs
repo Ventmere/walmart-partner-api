@@ -1,25 +1,25 @@
-pub use self::item::{ItemReport, ItemReportRow, ItemReportType};
-use crate::client::{Client, Method};
-use crate::result::*;
-
-use serde_urlencoded;
-use std::io::{Read, Write};
-mod item;
-use serde::{Deserialize, Serialize};
-
-pub trait ReportType {
-  type Data;
-
-  fn report_type() -> &'static str;
-  fn deserialize<R: Read>(r: R) -> WalmartResult<Self::Data>;
-}
-
-#[derive(Debug, Serialize, Default)]
-#[allow(non_snake_case)]
-pub struct GetReportQuery<'a> {
-  #[serde(rename = "type")]
-  pub type_: &'a str,
-}
+// pub use self::item::{ItemReport, ItemReportRow, ItemReportType};
+// use crate::client::{Client, Method};
+// use crate::result::*;
+//
+// use serde_urlencoded;
+// use std::io::{Read, Write};
+// mod item;
+// use serde::{Deserialize, Serialize};
+//
+// pub trait ReportType {
+//   type Data;
+//
+//   fn report_type() -> &'static str;
+//   fn deserialize<R: Read>(r: R) -> WalmartResult<Self::Data>;
+// }
+//
+// #[derive(Debug, Serialize, Default)]
+// #[allow(non_snake_case)]
+// pub struct GetReportQuery<'a> {
+//   #[serde(rename = "type")]
+//   pub type_: &'a str,
+// }
 
 // impl Client {
 //   pub async fn get_report<R: ReportType>(&self) -> WalmartResult<R::Data> {

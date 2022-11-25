@@ -1,56 +1,58 @@
-use crate::result::*;
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use serde_urlencoded;
-
+// use crate::result::*;
+// use chrono::{DateTime, Utc};
+// use serde::{Deserialize, Serialize};
+// use serde_json::Value;
+// use serde_urlencoded;
+//
 mod types;
+pub use types::*;
 
-pub use self::types::*;
-use crate::client::{Client, Method};
-use crate::response::{parse_list_elements_json, parse_object_json, ListResponse};
-
-/// Query parameters for `get_all_released_orders`
-
-#[derive(Debug, Serialize, Default)]
-#[allow(non_snake_case)]
-pub struct ReleasedQueryParams {
-  pub limit: Option<i32>,
-  pub createdStartDate: Option<DateTime<Utc>>,
-  pub nextCursor: Option<String>,
-}
-
-/// Query parameters for `get_all_orders`
-#[derive(Debug, Serialize, Default)]
-#[allow(non_snake_case)]
-pub struct QueryParams {
-  pub sku: Option<String>,
-  pub customerOrderId: Option<String>,
-  pub purchaseOrderId: Option<String>,
-  pub status: Option<String>,
-  pub createdStartDate: Option<DateTime<Utc>>,
-  pub createdEndDate: Option<DateTime<Utc>>,
-  pub fromExpectedShipDate: Option<DateTime<Utc>>,
-  pub toExpectedShipDate: Option<DateTime<Utc>>,
-  pub limit: Option<i32>,
-  pub nextCursor: Option<String>,
-  pub shipNodeType: Option<String>,
-}
-
-#[derive(Debug, Clone)]
-#[allow(non_snake_case)]
-pub struct ShipParams {
-  pub lineNumber: String,
-  pub shipDateTime: DateTime<Utc>,
-  pub carrierName: Option<String>,
-  pub methodCode: String,
-  pub trackingNumber: String,
-  pub trackingURL: String,
-  pub otherCarrier: Option<String>,
-  pub unitOfMeasurement: Option<String>,
-  pub amount: Option<String>,
-  pub shipFromCountry: String,
-}
+//
+// pub use self::types::*;
+// use crate::client::{Client, Method};
+// use crate::response::{parse_list_elements_json, parse_object_json, ListResponse};
+//
+// /// Query parameters for `get_all_released_orders`
+//
+// #[derive(Debug, Serialize, Default)]
+// #[allow(non_snake_case)]
+// pub struct ReleasedQueryParams {
+//   pub limit: Option<i32>,
+//   pub createdStartDate: Option<DateTime<Utc>>,
+//   pub nextCursor: Option<String>,
+// }
+//
+// /// Query parameters for `get_all_orders`
+// #[derive(Debug, Serialize, Default)]
+// #[allow(non_snake_case)]
+// pub struct QueryParams {
+//   pub sku: Option<String>,
+//   pub customerOrderId: Option<String>,
+//   pub purchaseOrderId: Option<String>,
+//   pub status: Option<String>,
+//   pub createdStartDate: Option<DateTime<Utc>>,
+//   pub createdEndDate: Option<DateTime<Utc>>,
+//   pub fromExpectedShipDate: Option<DateTime<Utc>>,
+//   pub toExpectedShipDate: Option<DateTime<Utc>>,
+//   pub limit: Option<i32>,
+//   pub nextCursor: Option<String>,
+//   pub shipNodeType: Option<String>,
+// }
+//
+// #[derive(Debug, Clone)]
+// #[allow(non_snake_case)]
+// pub struct ShipParams {
+//   pub lineNumber: String,
+//   pub shipDateTime: DateTime<Utc>,
+//   pub carrierName: Option<String>,
+//   pub methodCode: String,
+//   pub trackingNumber: String,
+//   pub trackingURL: String,
+//   pub otherCarrier: Option<String>,
+//   pub unitOfMeasurement: Option<String>,
+//   pub amount: Option<String>,
+//   pub shipFromCountry: String,
+// }
 
 // impl ShipParams {
 //   pub fn to_value(&self) -> Value {

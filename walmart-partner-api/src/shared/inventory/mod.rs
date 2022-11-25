@@ -1,9 +1,9 @@
-use crate::response::JsonMaybe;
-use crate::result::*;
-mod types;
-
-pub use self::types::*;
-use crate::client::{Client, Method, WalmartMarketplace};
+// use crate::response::JsonMaybe;
+// use crate::result::*;
+// mod types;
+//
+// pub use self::types::*;
+// use crate::client::{Client, Method, WalmartMarketplace};
 //
 // impl Client {
 //   pub fn get_item_inventory(&self, sku: &str) -> WalmartResult<Inventory> {
