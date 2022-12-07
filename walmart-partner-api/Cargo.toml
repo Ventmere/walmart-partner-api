@@ -10,20 +10,25 @@ edition = "2021"
 
 [dependencies]
 url = "2.3"
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = ["json", "stream"] }
 base64 = "0.13"
 chrono = { version = "0.4", features = ["serde"] }
 openssl = "0.10"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_derive = "1.0"
 rand = "0.8"
 serde_urlencoded = "0.7"
-zip = "0.6.3"
-csv = "1.1.6"
-tempfile = "3.3"
 bigdecimal = "0.3"
-xmltree = "0.8.0"
 thiserror = "1.0"
-quick-xml = { version = "0.26.0", features = ["serialize"] }
-tracing = "0.1.37"
+tracing = "0.1"
 uuid = { version = "1.2", features = ["v4"] }
+serde-xml-rs = "0.6"
+xml-builder = "0.5"
+zip = "0.6"
+csv = "1.1"
+tempfile = "3.3"
+
+[dev-dependencies]
+mockito = "0.31"
+tokio = { version = "1.13", features = ["rt", "macros"] }

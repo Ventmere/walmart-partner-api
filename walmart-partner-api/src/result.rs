@@ -1,12 +1,16 @@
-use reqwest::StatusCode;
 use std::error;
 use std::fmt;
+
+use reqwest::StatusCode;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum WalmartError {
   #[error("{0}")]
-  Msg(String),
+  Auth(String),
+
+  #[error("{0}")]
+  Csv(String),
 
   #[error("api response error: {0}")]
   Api(#[from] ApiResponseError),
@@ -26,31 +30,28 @@ pub enum WalmartError {
   #[error("url query serialize error: {0}")]
   UrlEncoded(#[from] serde_urlencoded::ser::Error),
 
+  #[error("json error: {0}")]
+  JsonSerde(#[from] serde_json::Error),
+
+  #[error("xml error: {0}")]
+  XmlSerde(#[from] serde_xml_rs::Error),
+
   #[error("xml serialization error: {0}")]
-  XmlSer(#[from] quick_xml::de::DeError),
+  XmlSer(String),
 
   #[error("io error: {0}")]
   Io(#[from] std::io::Error),
 
-  #[error("zip error: {0}")]
+  #[error("{0}")]
   Zip(#[from] zip::result::ZipError),
-
-  #[error("xml parse error: {0}")]
-  XmlParse(#[from] xmltree::ParseError),
-
-  #[error("csv error: {0}")]
-  Csv(#[from] csv::Error),
 
   #[error("invalid header value: {0}")]
   InvalidHeaderValue(#[from] reqwest::header::InvalidHeaderValue),
-
-  #[error("unexpected xml: {0}")]
-  UnexpectedXml(String),
 }
 
-impl From<String> for WalmartError {
-  fn from(v: String) -> Self {
-    Self::Msg(v)
+impl From<xml_builder::XMLError> for WalmartError {
+  fn from(e: xml_builder::XMLError) -> Self {
+    Self::XmlSer(format!("{:?}", e))
   }
 }
 
@@ -66,6 +67,10 @@ impl WalmartError {
           false
         }
       }
+      WalmartError::Api(ref err) => {
+        let code = err.status.as_u16();
+        code == 429 || code == 500 || code == 503
+      }
       _ => false,
     }
   }
@@ -73,7 +78,7 @@ impl WalmartError {
 
 #[derive(Debug)]
 pub struct ApiResponseError {
-  pub message: String,
+  pub path: String,
   pub status: StatusCode,
   pub body: String,
 }
@@ -82,8 +87,8 @@ impl fmt::Display for ApiResponseError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(
       f,
-      "API Error: status = '{}', message = '{}'",
-      self.status, self.message
+      "Walmart API error: status = '{}', path = '{}",
+      self.status, self.path,
     )
   }
 }

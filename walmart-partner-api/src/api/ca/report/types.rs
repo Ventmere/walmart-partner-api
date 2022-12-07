@@ -1,11 +1,19 @@
-use super::ReportType;
-use crate::result::*;
-use bigdecimal::BigDecimal;
-use csv;
 use std::io::prelude::*;
 use std::io::BufReader;
+
+use bigdecimal::BigDecimal;
+use csv;
 use tempfile;
 use zip::read::ZipArchive;
+
+use crate::result::*;
+
+pub trait ReportType {
+  type Data;
+
+  fn report_type() -> &'static str;
+  fn deserialize<R: Read>(r: R) -> WalmartResult<Self::Data>;
+}
 
 pub struct ItemReportType;
 
@@ -38,19 +46,13 @@ macro_rules! impl_from_csv {
           match headers.get(i).map(AsRef::as_ref) {
             $(
               Some($header) => {
-                $field = v.parse().map_err(|err| -> WalmartError {
-                  format!("Parse field '{}' error: {}", $header, err).into()
+                $field = v.parse().map_err(|err| {
+                  WalmartError::Csv(format!("Parse field '{}' error: {}", $header, err))
                 }).ok()
               }
             )*,
-            Some(unknown_header) => {
-              return Err(
-                format!("Unknown header '{}'.", unknown_header).into()
-              )
-            }
-            None => return Err(
-              format!("Column index {} is out of bound.", i).into()
-            ),
+            Some(unknown_header) => return Err(WalmartError::Csv(format!("Unknown header '{}'.", unknown_header))),
+            None => return Err(WalmartError::Csv(format!("Column index {} is out of bound.", i))),
           }
         }
 
@@ -64,9 +66,7 @@ macro_rules! impl_from_csv {
   };
 
   (GET_VALUE $field:ident, $header:expr, ) => {
-    $field.ok_or_else(|| -> WalmartError {
-      format!("Field '{}' was not found.", $header).into()
-    })?
+    $field.ok_or_else(|| WalmartError::Csv(format!("Field '{}' was not found.", $header)))?
   };
 
   (GET_VALUE $field:ident, $header:expr, optional) => {
@@ -84,10 +84,16 @@ impl_from_csv! {
     pub product_name: String,
     #[csv(header = "PRODUCT CATEGORY")]
     pub product_category: String,
-    #[csv(header = "PRICE")]
-    pub price: BigDecimal,
-    #[csv(header = "CURRENCY")]
-    pub currency: String,
+    #[csv(header = "PRICE", optional)]
+    pub price: Option<BigDecimal>,
+    #[csv(header = "CURRENCY", optional)]
+    pub currency: Option<String>,
+    #[csv(header = "BUY BOX ITEM PRICE", optional)]
+    pub buy_box_item_price: Option<BigDecimal>,
+    #[csv(header = "BUY BOX SHIPPING PRICE", optional)]
+    pub buy_box_shipping_price: Option<BigDecimal>,
+    #[csv(header = "WON BUY BOX?", optional)]
+    pub won_buy_box: Option<String>,
     #[csv(header = "PUBLISH STATUS")]
     pub publish_status: String,
     #[csv(header = "STATUS CHANGE REASON")]
@@ -142,21 +148,23 @@ impl ReportType for ItemReportType {
 
     let mut tmp_file = tempfile::tempfile()?;
     copy(&mut r, &mut tmp_file)?;
+
     tmp_file.seek(SeekFrom::Start(0))?;
     let mut br = BufReader::new(&mut tmp_file);
     let mut zip = ZipArchive::new(&mut br)?;
+
     let csv_file = zip.by_index(0)?;
     let mut csv_reader = csv::Reader::from_reader(csv_file);
     let headers: Vec<String> = csv_reader
       .headers()
-      .map_err(|err| -> WalmartError { format!("Parse csv header error: {}", err).into() })?
+      .map_err(|err| WalmartError::Csv(format!("Parse csv header error: {}", err)))?
       .iter()
       .map(|s| s.to_string())
       .collect();
     let mut rows = vec![];
     for (i, result) in csv_reader.records().enumerate() {
-      let record = result.map_err(|err| -> WalmartError {
-        format!("Line {}: Parse csv error: {}", i + 1, err).into()
+      let record = result.map_err(|err| {
+        WalmartError::Csv(format!("Line {}: Parse csv error: {}", i + 1, err).into())
       })?;
       let fields: Vec<&str> = record.into_iter().collect();
       rows.push(ItemReportRow::from_csv(&headers, &fields)?)
@@ -165,13 +173,3 @@ impl ReportType for ItemReportType {
     Ok(ItemReport { rows })
   }
 }
-
-// #[test]
-// fn test_item_report_deserialize() {
-//   use std::io::prelude::*;
-//   use std::fs::File;
-
-//   let mut f = File::open("../target/report.zip").unwrap();
-//   let report = ItemReportType::deserialize(f).unwrap();
-//   println!("{:#?}", report.rows)
-// }

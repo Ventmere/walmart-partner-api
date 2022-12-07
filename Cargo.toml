@@ -2,4 +2,5 @@
 members = [
   "cli",
   "walmart-partner-api",
+  "openapi"
 ]

@@ -1,21 +1,19 @@
-extern crate base64;
-extern crate bigdecimal;
-extern crate chrono;
-extern crate csv;
+#[macro_use]
+extern crate serde_derive;
+
+pub use api::*;
+pub use client::{WalmartCredential, WalmartMarketplace};
+pub use result::{WalmartError, WalmartResult};
 
 mod api;
 mod client;
-pub mod feed;
-pub mod inventory;
-pub mod item;
-pub mod order;
-pub mod report;
-pub mod response;
 pub mod result;
 mod shared;
 mod sign;
+#[cfg(test)]
+mod test_util;
 mod utils;
-mod xml;
 
-pub use self::client::{Client, WalmartCredential, WalmartMarketplace};
-pub use api::*;
+pub trait XmlSer {
+  fn to_xml(&self) -> WalmartResult<xml_builder::XMLElement>;
+}

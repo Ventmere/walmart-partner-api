@@ -15,3 +15,5 @@ samples
 .DS_Store
 .vscode
 .idea
+/schemas
+/tmp
