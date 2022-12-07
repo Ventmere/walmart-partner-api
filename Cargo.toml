@@ -1,5 +1,6 @@
 [workspace]
 members = [
   "cli",
-  "walmart-partner-api"
+  "walmart-partner-api",
+  "openapi"
 ]

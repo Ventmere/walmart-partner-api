@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<list
+        xmlns:ns2="http://walmart.com/mp/orders"
+        xmlns:ns3="http://walmart.com/mp/v3/orders"
+        xmlns:ns4="http://walmart.com/">
+    <meta>
+        <totalCount>367</totalCount>
+        <limit>10</limit>
+        <nextCursor>?limit=10&amp;hasMoreElements=true&amp;soIndex=2&amp;poIndex=2&amp;sellerId=10&amp;status=Created&amp;createdStartDate=2016-01-01&amp;createdEndDate=2016-06-03T22:45:16.377Z</nextCursor>
+    </meta>
+    <elements>
+        <order>
+            <purchaseOrderId>2575263094491</purchaseOrderId>
+            <customerOrderId>4091603648841</customerOrderId>
+            <customerEmailId>gsingh@walmartlabs.com</customerEmailId>
+            <orderDate>2016-05-18T16:53:14.000Z</orderDate>
+            <shippingInfo>
+                <phone>2342423234</phone>
+                <estimatedDeliveryDate>2016-06-22T06:00:00.000Z</estimatedDeliveryDate>
+                <estimatedShipDate>2016-06-15T06:00:00.000Z</estimatedShipDate>
+                <methodCode>Standard</methodCode>
+                <postalAddress>
+                    <name>PGOMS Walmart</name>
+                    <address1>850 Cherry Avenue</address1>
+                    <address2>Floor 5</address2>
+                    <city>San Bruno</city>
+                    <state>CA</state>
+                    <postalCode>94066</postalCode>
+                    <country>USA</country>
+                    <addressType>RESIDENTIAL</addressType>
+                </postalAddress>
+            </shippingInfo>
+            <orderLines>
+                <orderLine>
+                    <lineNumber>4</lineNumber>
+                    <item>
+                        <productName>Kenmore CF1 or 2086883 Canister Secondary Filter Generic 2 Pack</productName>
+                        <sku>RCA-OF-444gku444</sku>
+                    </item>
+                    <charges>
+                        <charge>
+                            <chargeType>PRODUCT</chargeType>
+                            <chargeName>ItemPrice</chargeName>
+                            <chargeAmount>
+                                <currency>USD</currency>
+                                <amount>25.00</amount>
+                            </chargeAmount>
+                            <tax>
+                                <taxName>Tax1</taxName>
+                                <taxAmount>
+                                    <currency>USD</currency>
+                                    <amount>1.87</amount>
+                                </taxAmount>
+                            </tax>
+                        </charge>
+                    </charges>
+                    <orderLineQuantity>
+                        <unitOfMeasurement>EACH</unitOfMeasurement>
+                        <amount>1</amount>
+                    </orderLineQuantity>
+                    <statusDate>2016-05-18T17:01:26.000Z</statusDate>
+                    <orderLineStatuses>
+                        <orderLineStatus>
+                            <status>Created</status>
+                            <statusQuantity>
+                                <unitOfMeasurement>EACH</unitOfMeasurement>
+                                <amount>1</amount>
+                            </statusQuantity>
+                        </orderLineStatus>
+                    </orderLineStatuses>
+                </orderLine>
+            </orderLines>
+        </order>
+        <order>
+            <purchaseOrderId>2575263094492</purchaseOrderId>
+            <customerOrderId>4091603648841</customerOrderId>
+            <customerEmailId>gsingh@walmartlabs.com</customerEmailId>
+            <orderDate>2016-05-18T16:53:14.000Z</orderDate>
+            <shippingInfo>
+                <phone>2342423234</phone>
+                <estimatedDeliveryDate>2016-06-22T06:00:00.000Z</estimatedDeliveryDate>
+                <estimatedShipDate>2016-06-15T06:00:00.000Z</estimatedShipDate>
+                <methodCode>Standard</methodCode>
+                <postalAddress>
+                    <name>PGOMS Walmart</name>
+                    <address1>850 Cherry Avenue</address1>
+                    <address2>Floor 5</address2>
+                    <city>San Bruno</city>
+                    <state>CA</state>
+                    <postalCode>94066</postalCode>
+                    <country>USA</country>
+                    <addressType>RESIDENTIAL</addressType>
+                </postalAddress>
+            </shippingInfo>
+            <orderLines>
+                <orderLine>
+                    <lineNumber>1</lineNumber>
+                    <item>
+                        <productName>Kenmore CF1 or 2086883 Canister Secondary Filter Generic 2 Pack</productName>
+                        <sku>RCA-OF-444gku444</sku>
+                    </item>
+                    <charges>
+                        <charge>
+                            <chargeType>PRODUCT</chargeType>
+                            <chargeName>ItemPrice</chargeName>
+                            <chargeAmount>
+                                <currency>USD</currency>
+                                <amount>25.00</amount>
+                            </chargeAmount>
+                            <tax>
+                                <taxName>Tax1</taxName>
+                                <taxAmount>
+                                    <currency>USD</currency>
+                                    <amount>1.89</amount>
+                                </taxAmount>
+                            </tax>
+                        </charge>
+                    </charges>
+                    <orderLineQuantity>
+                        <unitOfMeasurement>EACH</unitOfMeasurement>
+                        <amount>1</amount>
+                    </orderLineQuantity>
+                    <statusDate>2016-05-18T17:01:26.000Z</statusDate>
+                    <orderLineStatuses>
+                        <orderLineStatus>
+                            <status>Created</status>
+                            <statusQuantity>
+                                <unitOfMeasurement>EACH</unitOfMeasurement>
+                                <amount>1</amount>
+                            </statusQuantity>
+                        </orderLineStatus>
+                    </orderLineStatuses>
+                    <originalCarrierMethod>91</originalCarrierMethod>
+                </orderLine>
+            </orderLines>
+        </order>
+    </elements>
+</list>
