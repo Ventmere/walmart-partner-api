@@ -1,10 +1,10 @@
-use std::fmt::format;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
 
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -17,6 +17,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
   Download { country: Country, api_name: ApiName },
+  Generate { country: Country, api_name: ApiName },
 }
 
 #[derive(Debug, Serialize, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -24,6 +25,16 @@ enum Commands {
 enum Country {
   Us,
   Ca,
+}
+
+impl ToString for Country {
+  fn to_string(&self) -> String {
+    serde_json::to_value(self)
+      .unwrap()
+      .as_str()
+      .unwrap()
+      .to_string()
+  }
 }
 
 #[derive(Debug, Serialize, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -44,9 +55,20 @@ enum ApiName {
   Notifications,
   Utilities,
   Insights,
+  OnRequestReports,
 }
 
-fn download_schema_files(country: Country, api_name: ApiName) {
+impl ToString for ApiName {
+  fn to_string(&self) -> String {
+    serde_json::to_value(self)
+      .unwrap()
+      .as_str()
+      .unwrap()
+      .to_string()
+  }
+}
+
+fn download_schema_file(country: Country, api_name: ApiName) -> Result<PathBuf> {
   #[derive(Debug, Serialize)]
   struct Body {
     params: Params,
@@ -76,23 +98,79 @@ fn download_schema_files(country: Country, api_name: ApiName) {
     .error_for_status()
     .unwrap();
 
-  let country = serde_json::to_value(&country)
-    .unwrap()
-    .as_str()
-    .unwrap()
-    .to_string();
-  let api_name = serde_json::to_value(&api_name)
-    .unwrap()
-    .as_str()
-    .unwrap()
-    .to_string();
+  let resolver = PathResolver::new(country, api_name);
+  resolver.create_schema_dir()?;
+  let (path, mut file) = resolver.create_schema_file()?;
 
-  let dir_path = PathBuf::from(format!("../schemas/{}", country));
-  fs::create_dir_all(&dir_path).unwrap();
+  io::copy(&mut response, &mut file).context("Failed to copy reqwest body to schema file")?;
+  Ok(path)
+}
 
-  let file_path = dir_path.join(format!("{}.json", api_name));
-  let mut file = fs::File::create(file_path).unwrap();
-  io::copy(&mut response, &mut file).unwrap();
+#[derive(Clone)]
+struct PathResolver {
+  country: Country,
+  api_name: ApiName,
+}
+
+impl PathResolver {
+  fn new(country: Country, api_name: ApiName) -> Self {
+    Self { country, api_name }
+  }
+
+  fn get_current_dir() -> PathBuf {
+    let path = std::env::current_dir().unwrap();
+    if !path.ends_with("walmart-partner-api") {
+      panic!(
+        "Make sure you run this command in the root directory of the project (walmart-partner-api)"
+      );
+    }
+    path
+  }
+
+  fn create_schema_file(&self) -> Result<(PathBuf, fs::File)> {
+    let path = self.get_schema_file_path();
+    let file = fs::File::create(path.clone())
+      .context(format!("Failed to create schema file for {:?}", path))?;
+    Ok((path, file))
+  }
+
+  fn create_schema_dir(&self) -> Result<PathBuf> {
+    let path = self.get_country_schema_dir();
+    fs::create_dir_all(&path).context(format!("Failed to create schema directory: {:?}", path))?;
+    Ok(path)
+  }
+
+  fn get_schema_file_path(&self) -> PathBuf {
+    let path = self
+      .get_country_schema_dir()
+      .join(format!("{}.json", self.api_name.to_string()));
+    path
+  }
+
+  fn get_country_schema_dir(&self) -> PathBuf {
+    let path = Self::get_current_dir()
+      .join("schemas")
+      .join(self.country.to_string());
+    path
+  }
+}
+
+fn generate(_country: Country, _api_name: ApiName) -> Result<()> {
+  unimplemented!();
+
+  // Command::new("openapi-generator")
+  //   .arg("generate")
+  //   .arg("-i")
+  //   .arg(path.to_str().unwrap_or_default())
+  //   .arg("--skip-validate-spec")
+  //   .arg("--global-property")
+  //   .arg("models,modelDocs=false")
+  //   .arg("-g")
+  //   .arg("rust")
+  //   .arg("-o")
+  //   .arg("tmp")
+  //   .status()
+  //   .context("Failed to execute openapi-generator command")?;
 }
 
 fn main() {
@@ -100,7 +178,10 @@ fn main() {
 
   match &cli.command {
     Commands::Download { country, api_name } => {
-      download_schema_files(*country, *api_name);
+      download_schema_file(*country, *api_name).unwrap();
+    }
+    Commands::Generate { country, api_name } => {
+      generate(*country, *api_name).unwrap();
     }
   }
 }
