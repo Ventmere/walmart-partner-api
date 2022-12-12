@@ -3,14 +3,11 @@ use crate::result::*;
 mod types;
 
 pub use self::types::*;
-use crate::client::{Client, Method, WalmartMarketplace};
+use crate::client::{Client, Method};
 
 impl Client {
   pub fn get_item_inventory(&self, sku: &str) -> WalmartResult<Inventory> {
-    let path = match self.get_marketplace() {
-      WalmartMarketplace::USA => "/v2/inventory",
-      WalmartMarketplace::Canada => "/v3/inventory",
-    };
+    let path = "/v3/inventory";
     self
       .send(self.request_json(Method::GET, path, vec![("sku", sku)])?)?
       .json_maybe::<Inventory>()
@@ -18,10 +15,7 @@ impl Client {
   }
 
   pub fn update_item_inventory(&self, inventory: &Inventory) -> WalmartResult<Inventory> {
-    let path = match self.get_marketplace() {
-      WalmartMarketplace::USA => "/v2/inventory",
-      WalmartMarketplace::Canada => "/v3/inventory",
-    };
+    let path = "/v3/inventory";
     self
       .send(
         self

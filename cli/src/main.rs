@@ -96,6 +96,10 @@ fn main() {
         (@arg quantity: -q --quantity +required +takes_value "Quantity")
         (@arg lagtime: -l --lagtime +required +takes_value "Fulfillment Lag Time")
       )
+      (@subcommand get =>
+        (about: "get sku inventory")
+        (@arg sku: -s --sku +required +takes_value "SKU")
+      )
     )
   )
   .get_matches();
@@ -198,6 +202,10 @@ fn main() {
         let quantity = m.value_of("quantity").unwrap().parse().unwrap();
         let lagtime = m.value_of("lagtime").unwrap().parse().unwrap();
         inventory::set_inventory(&client, &sku, quantity, lagtime);
+      }
+      ("get", Some(m)) => {
+        let sku = m.value_of("sku").unwrap();
+        inventory::get_inventory(&client, &sku);
       }
       _ => {}
     },

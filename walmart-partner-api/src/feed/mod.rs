@@ -53,13 +53,12 @@ impl Client {
     feed_type: &str,
     feed: R,
   ) -> WalmartResult<FeedAck> {
-    use reqwest::header::{HeaderValue, CONTENT_TYPE};
-    use reqwest::Body;
+    let form = reqwest::multipart::Form::new()
+        .part("file", reqwest::multipart::Part::reader(feed));
     let mut res = self.send(
       self
         .request_xml(Method::POST, "/v3/feeds", vec![("feedType", feed_type)])?
-        .body(Body::new(feed))
-        .header(CONTENT_TYPE, HeaderValue::from_static("application/xml")),
+        .multipart(form)
     )?;
     let xml = Xml::<FeedAck>::from_res(&mut res)?;
     Ok(xml.into_inner())

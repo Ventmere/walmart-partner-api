@@ -9,7 +9,7 @@ pub struct Quantity {
 pub struct Inventory {
   pub sku: String,
   pub quantity: Quantity,
-  pub fulfillmentLagTime: i32,
+  pub fulfillmentLagTime: Option<i32>,
 }
 
 impl Inventory {
@@ -20,7 +20,7 @@ impl Inventory {
         unit: "EACH".to_owned(),
         amount: quantity,
       },
-      fulfillmentLagTime: fulfillment_lag_time,
+      fulfillmentLagTime: Some(fulfillment_lag_time),
     }
   }
 }

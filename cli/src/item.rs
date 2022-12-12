@@ -7,7 +7,7 @@ pub fn dump(client: &Client) {
   params.limit = Some(20);
   let mut items = vec![];
   loop {
-    println!("loading params = {:#?}", params);
+    println!("loading params = {:#?}, total = {}", params, items.len());
 
     let (res, next_params) = client.get_all_items(&params).unwrap();
     let mut res = res.into_inner();
