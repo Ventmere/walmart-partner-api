@@ -17,39 +17,18 @@ pub struct GetAllItems {
 }
 
 impl GetAllItems {
-  /// As of 2018/10/30,
-  /// `offset` works differently in USA
-  /// `totalItems` is always 0 in Canada response
-  /// `nextCursor` element never show up in Canada response
   pub(crate) fn get_next_query_params(
     &self,
     current_params: &GetAllItemsQueryParams,
-    marketplace: WalmartMarketplace,
+    _marketplace: WalmartMarketplace,
   ) -> Option<GetAllItemsQueryParams> {
-    match marketplace {
-      // use nextCursor
-      WalmartMarketplace::USA => {
-        self
-          .nextCursor
-          .as_ref()
-          .map(|next_cursor| GetAllItemsQueryParams {
-            nextCursor: next_cursor.to_string(),
-            ..current_params.clone()
-          })
-      }
-      // increase offset until the response has no items
-      WalmartMarketplace::Canada => {
-        if self.items.is_empty() {
-          None
-        } else {
-          let limit = current_params.limit.clone().unwrap_or(20);
-          Some(GetAllItemsQueryParams {
-            offset: current_params.offset.or(Some(0)).map(|v| v + limit),
-            ..current_params.clone()
-          })
-        }
-      }
-    }
+    self
+      .nextCursor
+      .as_ref()
+      .map(|next_cursor| GetAllItemsQueryParams {
+        nextCursor: next_cursor.to_string(),
+        ..current_params.clone()
+      })
   }
 }
 
