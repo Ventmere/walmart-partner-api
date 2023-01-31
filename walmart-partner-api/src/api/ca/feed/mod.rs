@@ -32,11 +32,15 @@ impl Client {
   pub async fn bulk_upload_xml<R: Read + Send + 'static>(
     &self,
     feed_type: impl AsRef<str>,
-    feed: R,
+    mut feed: R,
   ) -> WalmartResult<FeedAck> {
+    let mut buffer = Vec::new();
+    feed.read_to_end(&mut buffer)?;
+    let part = reqwest::multipart::Part::bytes(buffer);
+    let form = reqwest::multipart::Form::new().part("file", part);
     let req = self
       .req_xml(Method::POST, "/v3/ca/feeds", vec![("feedType", feed_type)])?
-      .body_raw(feed, "application/xml")?;
+      .form(form);
     self.send(req).await?.res_xml().await
   }
 }
@@ -179,7 +183,6 @@ mod tests {
       .with_status(200)
       .with_header("content-type", "application/xml")
       .with_body(body)
-      .match_body("somefeed")
       .create();
 
     let got = client

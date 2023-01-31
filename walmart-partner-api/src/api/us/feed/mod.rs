@@ -1,3 +1,4 @@
+use std::io::Read;
 pub use types::*;
 
 use crate::api::us::Client;
@@ -24,6 +25,21 @@ impl Client {
     let qs = serde_urlencoded::to_string(&query)?;
     let path = format!("/v3/feeds/{}", feed_id.as_ref());
     let req = self.req_xml(Method::GET, &path, qs)?;
+    self.send(req).await?.res_xml().await
+  }
+
+  pub async fn bulk_upload_xml<R: Read + Send + 'static>(
+    &self,
+    feed_type: impl AsRef<str>,
+    mut feed: R,
+  ) -> WalmartResult<FeedAck> {
+    let mut buffer = Vec::new();
+    feed.read_to_end(&mut buffer)?;
+    let part = reqwest::multipart::Part::bytes(buffer);
+    let form = reqwest::multipart::Form::new().part("file", part);
+    let req = self
+      .req_xml(Method::POST, "/v3/feeds", vec![("feedType", feed_type)])?
+      .form(form);
     self.send(req).await?.res_xml().await
   }
 }
@@ -133,6 +149,33 @@ mod tests {
     assert_eq!(
       got.item_details.item_ingestion_status[0].mart_id.unwrap(),
       0,
+    );
+  }
+
+  #[tokio::test]
+  async fn test_bulk_upload_xml() {
+    let client = crate::test_util::get_client_us();
+    let body = r#"
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:FeedAcknowledgement xmlns:ns2="http://walmart.com/">
+    <ns2:feedId>884C20C71B7E42FAA41FABFA52596A62@AUoBAQA</ns2:feedId>
+</ns2:FeedAcknowledgement>
+    "#;
+
+    let _m = mockito::mock("POST", "/v3/feeds")
+      .match_query(Matcher::UrlEncoded("feedType".into(), "test".into()))
+      .with_status(200)
+      .with_header("content-type", "application/xml")
+      .with_body(body)
+      .create();
+
+    let got = client
+      .bulk_upload_xml("test", "somefeed".as_bytes())
+      .await
+      .unwrap();
+    assert_eq!(
+      got.feed_id.unwrap(),
+      "884C20C71B7E42FAA41FABFA52596A62@AUoBAQA"
     );
   }
 }

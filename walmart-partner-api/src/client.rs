@@ -262,6 +262,14 @@ impl WalmartReq {
     }
   }
 
+  pub fn form(self, form: reqwest::multipart::Form) -> Self {
+    Self {
+      rb: self.rb.multipart(form),
+      ..self
+    }
+  }
+
+  // Can be optimized by using streams
   pub fn body_raw<R: std::io::Read + Send + 'static>(
     self,
     mut body: R,
