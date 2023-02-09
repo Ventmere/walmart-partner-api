@@ -25,14 +25,18 @@ pub fn get_client_us() -> crate::us::Client {
   client
 }
 
-pub fn assert_xml_eq(xml: impl XmlSer, want: &str, msg: String) {
+pub fn assert_xml_str_eq(got: &str, want: &str, msg: impl ToString) {
+  let got: String = got.split_whitespace().collect();
+  let want: String = want.split_whitespace().collect();
+  assert_eq!(got, want, "{}", msg.to_string());
+}
+
+pub fn assert_xml_eq(got: impl XmlSer, want: &str, msg: impl ToString) {
   let mut buf = Vec::new();
-  xml
+  got
     .to_xml()
     .unwrap()
     .render(&mut buf, false, false)
     .unwrap();
-  let got: String = String::from_utf8(buf).unwrap().split_whitespace().collect();
-  let want: String = want.split_whitespace().collect();
-  assert_eq!(got, want, "{}", msg);
+  assert_xml_str_eq(&String::from_utf8(buf).unwrap(), want, msg);
 }

@@ -13,7 +13,6 @@ mod sign;
 #[cfg(test)]
 mod test_util;
 mod utils;
+mod xml;
 
-pub trait XmlSer {
-  fn to_xml(&self) -> WalmartResult<xml_builder::XMLElement>;
-}
+pub(crate) use xml::*;

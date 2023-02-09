@@ -179,3 +179,41 @@ mod tests {
     );
   }
 }
+
+#[test]
+fn test_emit_inventory_feed() {
+  let data = InventoryFeed {
+    items: vec![
+      InventoryFeedItem {
+        sku: "1068155".to_string(),
+        quantity: 10,
+      },
+      InventoryFeedItem {
+        sku: "10210321".to_string(),
+        quantity: 20,
+      },
+    ],
+  };
+  let xml = data.emit_xml().unwrap();
+  let want = r#"<?xml version="1.0" encoding="UTF-8"?>
+  <InventoryFeed xmlns="http://walmart.com/">
+    <InventoryHeader>
+        <version>1.4</version>
+    </InventoryHeader>
+    <inventory>
+        <sku>1068155</sku>
+        <quantity>
+            <unit>EACH</unit>
+            <amount>10</amount>
+        </quantity>
+    </inventory>
+    <inventory>
+        <sku>10210321</sku>
+        <quantity>
+            <unit>EACH</unit>
+            <amount>20</amount>
+        </quantity>
+    </inventory>
+</InventoryFeed>"#;
+  crate::test_util::assert_xml_str_eq(&xml, want, "not equal");
+}
