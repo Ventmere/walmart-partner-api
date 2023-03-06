@@ -75,6 +75,21 @@ impl Client {
     self.send(req).await?.res_xml().await
   }
 
+  pub async fn get_all_orders_by_next_cursor(
+    &self,
+    next_cursor: impl AsRef<str>,
+  ) -> WalmartResult<OrderList> {
+    use url::form_urlencoded;
+    let req = self.req_xml(
+      Method::GET,
+      "/v3/orders",
+      form_urlencoded::parse((&next_cursor.as_ref()[1..]).as_bytes())
+        .into_owned()
+        .collect::<Vec<_>>(),
+    )?;
+    self.send(req).await?.res_xml().await
+  }
+
   pub async fn get_all_released_orders(
     &self,
     query: GetAllReleasedOrdersQuery,

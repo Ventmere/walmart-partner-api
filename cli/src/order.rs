@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
 #[derive(Subcommand)]
 pub enum CaOrderCommand {
   List(List),
+  ListByCursor(ListByCursor),
   ListReleased(ListReleased),
   Get(Get),
   Ack(Get),
@@ -14,6 +15,7 @@ pub enum CaOrderCommand {
 #[derive(Subcommand)]
 pub enum UsOrderCommand {
   List(List),
+  ListByCursor(ListByCursor),
   ListReleased(ListReleased),
   Get(Get),
   Ack(Get),
@@ -48,6 +50,12 @@ pub struct List {
   pub limit: Option<i32>,
   #[clap(long)]
   pub product_info: Option<bool>,
+}
+
+#[derive(Parser)]
+pub struct ListByCursor {
+  #[clap(long)]
+  pub cursor: String,
 }
 
 #[derive(Parser)]
@@ -126,6 +134,10 @@ impl CaOrderCommand {
           .await?;
         println!("{:#?}", r)
       }
+      CaOrderCommand::ListByCursor(cmd) => {
+        let r = client.get_all_orders_by_next_cursor(cmd.cursor).await?;
+        println!("{:#?}", r)
+      }
       CaOrderCommand::ListReleased(cmd) => {
         let r = client
           .get_all_released_orders(walmart_partner_api::ca::GetAllReleasedOrdersQuery {
@@ -199,6 +211,10 @@ impl UsOrderCommand {
             order_type: None,
           })
           .await?;
+        println!("{:#?}", r)
+      }
+      UsOrderCommand::ListByCursor(cmd) => {
+        let r = client.get_all_orders_by_next_cursor(cmd.cursor).await?;
         println!("{:#?}", r)
       }
       UsOrderCommand::ListReleased(cmd) => {
