@@ -51,13 +51,13 @@ pub struct GetOrderQuery {
   pub replacement_into: Option<bool>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ShipOrderLines {
   pub order_lines: Vec<ShipOrderLine>,
   pub process_mode: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ShipOrderLine {
   pub line_number: String,
   pub seller_order_id: String,

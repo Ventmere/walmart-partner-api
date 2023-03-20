@@ -236,7 +236,7 @@ pub struct OrderFulfillment {
   pub store_id: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ShipOrderLineAsn {
   pub package_asn: String,
   pub pallet_asn: Option<String>,
@@ -259,7 +259,7 @@ impl XmlSer for ShipOrderLineAsn {
   }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct ShipOrderLineStatusQuantity {
   pub unit_of_measurement: Option<String>,
   pub amount: Option<String>,
