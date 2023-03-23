@@ -54,6 +54,9 @@ pub struct Order {
   pub shipping_info: ShippingInfo,
   #[serde(rename = "orderLines")]
   pub order_lines: OrderLines,
+  #[serde(rename = "shipNode")]
+  #[serde(default)]
+  pub ship_node: ShipNode,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

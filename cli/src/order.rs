@@ -50,6 +50,8 @@ pub struct List {
   pub limit: Option<i32>,
   #[clap(long)]
   pub product_info: Option<bool>,
+  #[clap(long)]
+  pub ship_node_type: Option<String>,
 }
 
 #[derive(Parser)]
@@ -130,6 +132,7 @@ impl CaOrderCommand {
             to_expected_ship_date: cmd.to_expected_ship_date,
             limit: cmd.limit,
             product_info: cmd.product_info,
+            ship_node_type: None,
           })
           .await?;
         println!("{:#?}", r)
@@ -206,7 +209,7 @@ impl UsOrderCommand {
             to_expected_ship_date: cmd.to_expected_ship_date,
             limit: cmd.limit,
             product_info: cmd.product_info,
-            ship_node_type: None,
+            ship_node_type: cmd.ship_node_type,
             replacement_into: None,
             order_type: None,
           })

@@ -131,6 +131,13 @@ pub struct OrderLineStatuses {
   pub order_line_status: Vec<OrderLineStatus>,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct ShipNode {
+  /// Specifies the type of shipNode. Allowed values are SellerFulfilled, WFSFulfilled and 3PLFulfilled
+  #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+  pub type_: Option<String>,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct OrderLineStatus {
   /// Should be 'Created'

@@ -32,6 +32,7 @@ pub struct GetAllOrdersQuery {
   pub to_expected_ship_date: Option<DateTime<Utc>>,
   pub limit: Option<i32>,
   pub product_info: Option<bool>,
+  pub ship_node_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]
