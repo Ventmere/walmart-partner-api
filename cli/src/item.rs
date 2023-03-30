@@ -49,13 +49,14 @@ impl CaItemCommand {
       CaItemCommand::List(cmd) => {
         let r = client
           .get_all_items(walmart_partner_api::ca::GetAllItemsQuery {
-            next_cursor: cmd.next_cursor,
+            next_cursor: cmd.next_cursor.map(Into::into).unwrap_or_default(),
             sku: cmd.sku,
             limit: cmd.limit,
             offset: cmd.offset,
           })
           .await?;
-        println!("{:#?}", r)
+        println!("{:#?}", r);
+        println!("response count: {}", r.item_response.len())
       }
       CaItemCommand::Retire(cmd) => {
         let r = client.retire_item(&cmd.sku).await?;
@@ -76,14 +77,15 @@ impl UsItemCommand {
       UsItemCommand::List(cmd) => {
         let r = client
           .get_all_items(walmart_partner_api::us::GetAllItemsQuery {
-            next_cursor: cmd.next_cursor,
+            next_cursor: cmd.next_cursor.map(Into::into).unwrap_or_default(),
             sku: cmd.sku,
             limit: cmd.limit,
             offset: cmd.offset,
             ..Default::default()
           })
           .await?;
-        println!("{:#?}", r)
+        println!("{:#?}", r);
+        println!("response count: {}", r.item_response.len())
       }
       UsItemCommand::Retire(cmd) => {
         let r = client.retire_item(&cmd.sku).await?;

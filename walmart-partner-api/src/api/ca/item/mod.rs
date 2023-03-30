@@ -11,10 +11,31 @@ mod types;
 #[derive(Debug, Clone, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetAllItemsQuery {
-  pub next_cursor: Option<String>,
+  pub next_cursor: GetAllItemsCursor,
   pub sku: Option<String>,
   pub limit: Option<i32>,
   pub offset: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct GetAllItemsCursor(String);
+
+impl Default for GetAllItemsCursor {
+  fn default() -> Self {
+    GetAllItemsCursor("*".to_string())
+  }
+}
+
+impl<T: ToString> From<T> for GetAllItemsCursor {
+  fn from(s: T) -> Self {
+    GetAllItemsCursor(s.to_string())
+  }
+}
+
+impl Into<String> for GetAllItemsCursor {
+  fn into(self) -> String {
+    self.0
+  }
 }
 
 impl Client {
@@ -50,7 +71,6 @@ mod tests {
     let client = crate::test_util::get_client_ca();
 
     let q = GetAllItemsQuery {
-      next_cursor: Some("foo".to_string()),
       ..Default::default()
     };
 
@@ -87,7 +107,7 @@ mod tests {
     let _m = mock("GET", "/v3/ca/items")
       .match_query(Matcher::AllOf(vec![Matcher::UrlEncoded(
         "nextCursor".into(),
-        q.next_cursor.clone().unwrap(),
+        q.next_cursor.clone().into(),
       )]))
       .with_status(200)
       .with_header("content-type", "application/xml")
