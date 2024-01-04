@@ -125,6 +125,17 @@ pub struct Order {
   pub orderLines: OrderLines,
 }
 
+// We need a separate WFS type because CA API doesn't return `purchaseOrderId` field for WFS orders
+#[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct OrderWFS {
+  pub customerOrderId: String,
+  pub customerEmailId: Option<String>,
+  pub orderDate: i64,
+  pub shippingInfo: ShippingInformation,
+  pub orderLines: OrderLines,
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
