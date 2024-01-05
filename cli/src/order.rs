@@ -18,9 +18,7 @@ pub fn list_wfs(client: &Client, status: Option<&str>) {
   let mut query: WFSQueryParams = Default::default();
   let start_date = (Utc::now() - Duration::days(7));
   query.createdStartDate = Some(start_date);
-  query.createdEndDate = Some(Utc::now());
-  // query.status = status.or(Some("Created")).map(|s| s.to_owned());
-  // query.status = status.or(Some("Acknowledged")).map(|s| s.to_owned());
+  query.status = status.map(|s| s.to_owned());
   let res = client.get_all_wfs_orders(&query).unwrap();
   println!("{:#?}", res);
 }
