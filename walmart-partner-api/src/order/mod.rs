@@ -36,6 +36,16 @@ pub struct QueryParams {
   pub shipNodeType: Option<String>,
 }
 
+#[derive(Debug, Serialize, Default)]
+pub struct WFSQueryParams {
+  pub customerOrderId: Option<String>,
+  pub createdStartDate: Option<DateTime<Utc>>,
+  pub createdEndDate: Option<DateTime<Utc>>,
+  pub status: Option<String>,
+  pub limit: Option<i32>,
+  pub offset: Option<i32>,
+}
+
 #[derive(Debug, Clone)]
 #[allow(non_snake_case)]
 pub struct ShipParams {
@@ -84,6 +94,7 @@ impl ShipParams {
 }
 
 pub type OrderList = ListResponse<Order>;
+pub type OrderWFSList = ListResponse<OrderWFS>;
 
 impl Client {
   pub fn get_all_released_orders(&self, params: &ReleasedQueryParams) -> WalmartResult<OrderList> {
@@ -96,6 +107,16 @@ impl Client {
     let mut res = self.send(self.request_json(
       Method::GET,
       "/v3/orders",
+      serde_urlencoded::to_string(params)?,
+    )?)?;
+    parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)
+  }
+
+  /// Get all WFS orders (Only Canada)
+  pub fn get_all_wfs_orders(&self, params: &WFSQueryParams) -> WalmartResult<OrderWFSList> {
+    let mut res = self.send(self.request_json(
+      Method::GET,
+      "/v3/orders/wfs",
       serde_urlencoded::to_string(params)?,
     )?)?;
     parse_list_elements_json(res.status(), &mut res, "order").map_err(Into::into)

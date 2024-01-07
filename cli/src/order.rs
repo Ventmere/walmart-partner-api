@@ -14,6 +14,15 @@ pub fn list(client: &Client, status: Option<&str>) {
   println!("{:#?}", res);
 }
 
+pub fn list_wfs(client: &Client, status: Option<&str>) {
+  let mut query: WFSQueryParams = Default::default();
+  let start_date = (Utc::now() - Duration::days(7));
+  query.createdStartDate = Some(start_date);
+  query.status = status.map(|s| s.to_owned());
+  let res = client.get_all_wfs_orders(&query).unwrap();
+  println!("{:#?}", res);
+}
+
 pub fn list_released(client: &Client) {
   let query: ReleasedQueryParams = Default::default();
   let res = client.get_all_released_orders(&query).unwrap();
@@ -82,7 +91,10 @@ pub fn ship(client: &Client, m: &ArgMatches) {
     otherCarrier: m.value_of("other_carrier").map(ToString::to_string),
     unitOfMeasurement: m.value_of("unit_of_measurement").map(ToString::to_string),
     amount: m.value_of("amount").map(ToString::to_string),
-    shipFromCountry: m.value_of("shipFromCountry").map(ToString::to_string).unwrap(),
+    shipFromCountry: m
+      .value_of("shipFromCountry")
+      .map(ToString::to_string)
+      .unwrap(),
   };
   let res = client
     .ship_order_line(m.value_of("ORDER_ID").unwrap(), &params)
