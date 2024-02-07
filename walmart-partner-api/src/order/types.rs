@@ -103,7 +103,7 @@ pub struct OrderLine {
   pub item: OrderLineItem,
   pub charges: OrderLineCharges,
   pub orderLineQuantity: Quantity,
-  pub statusDate: i64,
+  pub statusDate: Option<i64>,
   pub orderLineStatuses: OrderLineStatuss,
   // pub refund: Option<?>,
 }
