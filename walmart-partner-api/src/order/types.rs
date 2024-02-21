@@ -38,7 +38,7 @@ pub struct OrderLineItem {
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Tax {
-  pub taxName: String,
+  pub taxName: Option<String>,
   pub taxAmount: CurrencyAmount,
 }
 
