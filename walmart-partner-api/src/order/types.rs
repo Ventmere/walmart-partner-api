@@ -74,7 +74,7 @@ pub struct OrderLineTrackingInfoCarrier {
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct OrderLineTrackingInfo {
-  pub shipDateTime: i64,
+  pub shipDateTime: Option<i64>,
   pub carrierName: OrderLineTrackingInfoCarrier,
   pub methodCode: String,
   pub trackingNumber: String,
