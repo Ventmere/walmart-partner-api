@@ -77,7 +77,7 @@ pub struct OrderLineTrackingInfo {
   pub shipDateTime: Option<i64>,
   pub carrierName: OrderLineTrackingInfoCarrier,
   pub methodCode: String,
-  pub trackingNumber: String,
+  pub trackingNumber: Option<String>,
   pub trackingURL: Option<String>,
 }
 
