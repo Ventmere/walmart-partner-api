@@ -21,7 +21,7 @@ pub struct PostalAddress {
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct ShippingInformation {
-  pub phone: String,
+  pub phone: Option<String>,
   pub estimatedDeliveryDate: i64,
   pub estimatedShipDate: i64,
   pub methodCode: String,
