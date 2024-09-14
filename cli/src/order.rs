@@ -49,6 +49,7 @@ pub fn dump(client: &Client) {
   let mut next_cursor = res.get_next_cursor().map(str::to_string);
   let mut elements = res.elements;
   while let Some(cursor) = next_cursor {
+    println!("next_cursor = {:?}", cursor);
     let mut res = client.get_all_orders_by_next_cursor(&cursor).unwrap();
     next_cursor = res.get_next_cursor().map(str::to_string);
     // println!(
