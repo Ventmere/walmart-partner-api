@@ -22,7 +22,7 @@ pub struct PostalAddress {
 #[allow(non_snake_case)]
 pub struct ShippingInformation {
   pub phone: Option<String>,
-  pub estimatedDeliveryDate: i64,
+  pub estimatedDeliveryDate: Option<i64>,
   pub estimatedShipDate: i64,
   pub methodCode: String,
   pub postalAddress: PostalAddress,
