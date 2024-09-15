@@ -128,7 +128,7 @@ impl Client {
       self.request_json(
         Method::GET,
         "/v3/orders",
-        form_urlencoded::parse((&next_cursor[1..]).as_bytes())
+        form_urlencoded::parse((&next_cursor).as_bytes())
           .into_owned()
           .collect::<Vec<_>>(),
       )?,
