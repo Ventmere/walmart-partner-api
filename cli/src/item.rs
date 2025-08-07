@@ -29,3 +29,28 @@ pub fn dump(client: &Client) {
 
   println!("{}", serde_json::to_string_pretty(&items).unwrap());
 }
+
+pub fn dump_us(client: &Client) {
+  let mut params: GetAllItemsQueryParams = Default::default();
+  let mut items = vec![];
+  params.limit = Some(100);
+  loop {
+    println!("loading params = {:#?}, total = {}", params, items.len());
+
+    let (res, next_params) = client.get_all_items(&params).unwrap();
+    let mut res = res.into_inner();
+    println!("page items = {}, next = {:?}, totalItems = {}", res.items.len(), res.nextCursor, res.totalItems    );
+
+    items.append(&mut res.items);
+    if let Some(v) = res.nextCursor {
+      params.nextCursor = v;
+    } else {
+      break;
+    }
+  }
+
+  println!("totalItems = {}", items.len());
+
+  // println!("{}", serde_json::to_string_pretty(&items).unwrap());
+}
+

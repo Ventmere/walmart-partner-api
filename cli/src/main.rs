@@ -87,6 +87,9 @@ fn main() {
       (@subcommand dump =>
         (about: "dump items")
       )
+      (@subcommand dump_us =>
+        (about: "dump us items")
+      )
     )
     (@subcommand inventory =>
       (about: "Inventory API")
@@ -193,6 +196,9 @@ fn main() {
     ("item", Some(matches)) => match matches.subcommand() {
       ("dump", _) => {
         item::dump(&client);
+      }
+      ("dump_us", _) => {
+        item::dump_us(&client);
       }
       _ => {}
     },
