@@ -21,8 +21,8 @@ pub struct PostalAddress {
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct ShippingInformation {
-  pub phone: String,
-  pub estimatedDeliveryDate: i64,
+  pub phone: Option<String>,
+  pub estimatedDeliveryDate: Option<i64>,
   pub estimatedShipDate: i64,
   pub methodCode: String,
   pub postalAddress: PostalAddress,
@@ -38,7 +38,7 @@ pub struct OrderLineItem {
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct Tax {
-  pub taxName: String,
+  pub taxName: Option<String>,
   pub taxAmount: CurrencyAmount,
 }
 
@@ -74,10 +74,10 @@ pub struct OrderLineTrackingInfoCarrier {
 #[derive(Debug, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct OrderLineTrackingInfo {
-  pub shipDateTime: i64,
+  pub shipDateTime: Option<i64>,
   pub carrierName: OrderLineTrackingInfoCarrier,
   pub methodCode: String,
-  pub trackingNumber: String,
+  pub trackingNumber: Option<String>,
   pub trackingURL: Option<String>,
 }
 
@@ -103,7 +103,7 @@ pub struct OrderLine {
   pub item: OrderLineItem,
   pub charges: OrderLineCharges,
   pub orderLineQuantity: Quantity,
-  pub statusDate: i64,
+  pub statusDate: Option<i64>,
   pub orderLineStatuses: OrderLineStatuss,
   // pub refund: Option<?>,
 }
@@ -118,6 +118,17 @@ pub struct OrderLines {
 #[allow(non_snake_case)]
 pub struct Order {
   pub purchaseOrderId: String,
+  pub customerOrderId: String,
+  pub customerEmailId: Option<String>,
+  pub orderDate: i64,
+  pub shippingInfo: ShippingInformation,
+  pub orderLines: OrderLines,
+}
+
+// We need a separate WFS type because CA API doesn't return `purchaseOrderId` field for WFS orders
+#[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct OrderWFS {
   pub customerOrderId: String,
   pub customerEmailId: Option<String>,
   pub orderDate: i64,

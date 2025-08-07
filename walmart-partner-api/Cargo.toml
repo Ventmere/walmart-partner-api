@@ -1,6 +1,6 @@
 [package]
 name = "walmart_partner_api"
-version = "0.6.0"
+version = "0.9.0"
 authors = ["Flux Xu <fluxxu@gmail.com>"]
 description = "Rust client for Walmart Partner APIs"
 repository = "https://github.com/Ventmere/walmart-partner-api"

@@ -40,6 +40,10 @@ fn main() {
         (about: "Get orders created in last 24 hours")
         (@arg STATUS: "Sets the order status (default: Created)")        
       )
+      (@subcommand list_wfs =>
+        (about: "Get WFS orders created in last 24 hours")
+        (@arg STATUS: "Sets the order status (default: Created)")
+      )
       (@subcommand list_released => 
       )
       (@subcommand list_status =>
@@ -159,6 +163,9 @@ fn main() {
     ("order", Some(matches)) => match matches.subcommand() {
       ("list", m) => {
         order::list(&client, m.and_then(|m| m.value_of("STATUS")));
+      }
+      ("list_wfs", m) => {
+        order::list_wfs(&client, m.and_then(|m| m.value_of("STATUS")));
       }
       ("list_released", _) => {
         order::list_released(&client);
